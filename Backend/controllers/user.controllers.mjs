@@ -17,6 +17,17 @@ const signup = async (req, res) => {
                 .json({ error: "User with this email already exists" });
         }
         // If no user exists with this email, proceed with sign up
+
+        if (role === "admin") {
+            const adminExists = await pool.query(
+                "SELECT * FROM Users WHERE role = $1",
+                ["admin"]
+            );
+            if (adminExists.rows.length > 0) {
+                return res.status(400).json({ error: "admin already exists" });
+            }
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Insert the new user into the database
@@ -32,7 +43,7 @@ const signup = async (req, res) => {
             role: user.role,
         });
     } catch (error) {
-        console.error(err);
+        console.error(error);
         res.status(500).json({ error: "Error creating user" });
     }
 };
@@ -73,4 +84,14 @@ const login = async (req, res) => {
     }
 };
 
-export { signup, login };
+const getAllUsers = async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM Users");
+        const users = result.rows;
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching users" });
+    }
+};
+
+export { signup, login, getAllUsers };
