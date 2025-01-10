@@ -40,4 +40,4 @@ CREATE TABLE Order_Items (
     FOREIGN KEY (product_id) REFERENCES Products(id) ON DELETE CASCADE -- Foreign key to Products table
 );
 
-
+commit;

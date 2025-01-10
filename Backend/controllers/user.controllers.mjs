@@ -4,24 +4,73 @@ import jwt from "jsonwebtoken";
 import { pool } from "../db/db.mjs";
 
 const signup = async (req, res) => {
-  const { email, password, role } = req.body;
-  try {
-    const result = await pool.query("select * from Users where email = $1", [
-      email,
-    ]);
-    if (result.rows.length > 0) {
-      // If a user with this email exists, send a response
-      return res
-        .status(400)
-        .json({ error: "User with this email already exists" });
-    }
-    // If no user exists with this email, proceed with sign up
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const { email, password, role } = req.body;
+    try {
+        const result = await pool.query(
+            "select * from Users where email = $1",
+            [email]
+        );
+        if (result.rows.length > 0) {
+            // If a user with this email exists, send a response
+            return res
+                .status(400)
+                .json({ error: "User with this email already exists" });
+        }
+        // If no user exists with this email, proceed with sign up
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert the new user into the database
-    const newUser = await pool.query(
-      "INSERT INTO Users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
-      [email, hashedPassword, role]
-    );
-  } catch (error) {}
+        // Insert the new user into the database
+        const newUser = await pool.query(
+            "INSERT INTO Users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
+            [email, hashedPassword, role]
+        );
+        const user = newUser.rows[0];
+        res.status(201).json({
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+        });
+    } catch (error) {
+        console.error(err);
+        res.status(500).json({ error: "Error creating user" });
+    }
 };
+
+// Login controller
+const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    try {
+        const result = await pool.query(
+            "SELECT * FROM Users WHERE email = $1",
+            [email]
+        );
+        const user = result.rows[0];
+
+        if (!user) {
+            return res.status(400).json({ error: "User not found" });
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ error: "Invalid credentials" });
+        }
+
+        // Create JWT token
+        const token = jwt.sign(
+            { id: user.id, username: user.username, role: user.role },
+            process.env.JWT_SECRET,
+            {
+                expiresIn: "1h",
+            }
+        );
+
+        res.status(200).json({ token });
+    } catch (err) {
+        res.status(500).json({ error: "Login failed" });
+    }
+};
+
+export { signup, login };
