@@ -1,34 +1,44 @@
-import  { createContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { createContext, useState, useEffect } from "react";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
+	const [user, setUser] = useState(null);
 
-  const login = (userData) => {
-    setUser(userData);
-    localStorage.setItem('token', userData.token);
-  };
+	// Load user data from localStorage on initialization
+	useEffect(() => {
+		const token = localStorage.getItem("authToken");
+		const role = localStorage.getItem("role");
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
+		if (token && role) {
+			setUser({ token, role });
+		}
+	}, []);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // Mock token validation
-      setUser({ token, role: 'admin' });
-    }
-  }, []);
+	// Save user data to localStorage whenever it changes
+	useEffect(() => {
+		if (user) {
+			localStorage.setItem("authToken", user.token);
+			localStorage.setItem("role", user.role);
+		} else {
+			localStorage.removeItem("authToken");
+			localStorage.removeItem("role");
+		}
+	}, [user]);
 
-  return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      {children}
-    </AuthContext.Provider>
-  );
+	const login = (userData) => {
+		setUser(userData); // Set user data and save it to localStorage via the effect
+	};
+
+	const logout = () => {
+		setUser(null); // Clear user data from context
+		localStorage.removeItem("authToken"); // Remove the token
+		localStorage.removeItem("role"); // Remove the role
+	};
+
+	return (
+		<AuthContext.Provider value={{ user, setUser, login, logout }}>
+			{children}
+		</AuthContext.Provider>
+	);
 };
