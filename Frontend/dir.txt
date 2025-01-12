@@ -1,0 +1,51 @@
+ecommerce-website/
+├── public/
+│   └── favicon.ico
+├── src/
+│   ├── assets/                   # Static assets like images, logos, etc.
+│   │   └── logo.png
+│   ├── components/               # Reusable UI components
+│   │   ├── Navbar.jsx            # Navigation bar
+│   │   ├── ProductCard.jsx       # Individual product card
+│   │   ├── CartItem.jsx          # Individual cart item
+│   │   ├── Footer.jsx            # Footer component
+│   │   ├── ProductManager.jsx    # Admin product management component
+│   │   └── UserManager.jsx       # Admin user management component
+│   ├── context/                 # React Context for global state
+│   │   ├── AuthContext.jsx       # Context for authentication state
+│   │   └── CartContext.jsx       # Context for cart state
+│   ├── hooks/                    # Custom React hooks
+│   │   └── useAuth.jsx           # Hook for authentication logic
+│   ├── layouts/                  # Page layouts
+│   │   ├── AdminLayout.jsx       # Layout for admin pages
+│   │   └── MainLayout.jsx        # Layout for main pages (customers)
+│   ├── pages/                    # Page components
+│   │   ├── Home.jsx              # Homepage showing products
+│   │   ├── Login.jsx             # Login page
+│   │   ├── Signup.jsx            # Signup page
+│   │   ├── AdminDashboard.jsx    # Admin dashboard
+│   │   ├── ManageProducts.jsx    # Page for admin to manage products (Optional: use ProductManager)
+│   │   ├── ManageUsers.jsx       # Page for admin to manage users (Optional: use UserManager)
+│   │   ├── Cart.jsx              # Cart page for customers
+│   │   └── OrderSummary.jsx      # Order summary page for customers
+│   ├── router/                   # Centralized routing logic
+│   │   ├── AppRouter.jsx         # Central routing component
+│   │   └── ProtectedRoute.jsx    # Route protection based on roles
+│   ├── services/                 # API service functions
+│   │   ├── authService.js        # Auth-related API calls
+│   │   ├── productService.js     # Product-related API calls
+│   │   ├── userService.js        # User-related API calls
+│   │   └── adminService.js       # Admin-specific API calls
+│   ├── styles/                   # Custom styles if needed
+│   │   └── tailwind.css          # TailwindCSS entry point
+│   ├── utils/                    # Utility functions
+│   │   ├── validateForm.js       # Form validation helpers
+│   │   └── constants.js          # Constants like roles, etc.
+│   ├── App.jsx                   # Main React component
+│   ├── index.css                 # Main CSS file for Vite
+│   └── main.jsx                  # React DOM render
+├── .env                          # Environment variables
+├── package.json                  # Dependencies and scripts
+├── postcss.config.cjs            # PostCSS configuration
+├── tailwind.config.cjs           # TailwindCSS configuration
+└── vite.config.js                # Vite configuration
