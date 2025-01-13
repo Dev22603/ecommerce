@@ -1,73 +1,3 @@
-// import React, { useState } from "react";
-// import { adminService } from "../services/adminService";
-
-// const ProductManager = ({ products, refreshData }) => {
-//   const [newProduct, setNewProduct] = useState("");
-//   const [error, setError] = useState(null);
-
-//   const handleAddProduct = async () => {
-//     if (!newProduct) {
-//       setError("Product name cannot be empty.");
-//       return;
-//     }
-//     try {
-//       await adminService.addProduct({ name: newProduct });
-//       setNewProduct("");
-//       refreshData(); // Refresh product list
-//     } catch {
-//       setError("Failed to add product.");
-//     }
-//   };
-
-//   const handleDeleteProduct = async (productId) => {
-//     try {
-//       await adminService.deleteProduct(productId);
-//       refreshData(); // Refresh product list
-//     } catch {
-//       setError("Failed to delete product.");
-//     }
-//   };
-
-//   return (
-//     <div>
-//       <h2 className="text-xl font-bold mb-4">Product Management</h2>
-//       <div className="mb-4">
-//         <input
-//           type="text"
-//           value={newProduct}
-//           onChange={(e) => setNewProduct(e.target.value)}
-//           placeholder="New Product Name"
-//           className="p-2 border border-gray-300 rounded-lg mr-2"
-//         />
-//         <button
-//           onClick={handleAddProduct}
-//           className="py-2 px-4 bg-blue-600 text-white rounded-lg"
-//         >
-//           Add Product
-//         </button>
-//       </div>
-//       {error && <div className="text-red-600">{error}</div>}
-//       <ul className="space-y-2">
-//         {products.map((product) => (
-//           <li
-//             key={product.id}
-//             className="flex justify-between items-center p-2 border border-gray-200 rounded-lg"
-//           >
-//             <span>{product.name}</span>
-//             <button
-//               onClick={() => handleDeleteProduct(product.id)}
-//               className="py-1 px-3 bg-red-500 text-white rounded-lg"
-//             >
-//               Delete
-//             </button>
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// };
-
-// export default ProductManager;
 import React, { useEffect, useState } from "react";
 import { adminService } from "../services/adminService";
 
@@ -106,7 +36,7 @@ const ProductManager = ({ products, refreshData }) => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-		console.log(files);
+        console.log(files);
         if (files.length > 10) {
             setError("You can only select up to 10 images.");
             return;
@@ -276,19 +206,73 @@ const ProductManager = ({ products, refreshData }) => {
             </div>
             {error && <div className="text-red-600">{error}</div>}
 
-            <ul className="space-y-2">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map((product) => (
                     <li
                         key={product.id}
-                        className="flex justify-between items-center p-2 border border-gray-200 rounded-lg"
+                        className="p-4 border border-gray-200 rounded-lg shadow-md flex flex-col items-start"
                     >
-                        <span>{product.product_name}</span>
-                        <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="py-1 px-3 bg-red-500 text-white rounded-lg"
-                        >
-                            Delete
-                        </button>
+                        {/* Product Image */}
+                        <div className="w-full h-32 bg-gray-100 flex items-center justify-center overflow-hidden rounded-lg">
+                            {product.images && product.images.length > 0 ? (
+                                <img
+                                    src={`${product.images[0]}`} // First image from the array
+                                    alt={product.product_name}
+                                    className="object-cover h-full w-full"
+                                />
+                            ) : (
+                                <span className="text-gray-400">
+                                    No Image Available
+                                </span>
+                            )}
+                        </div>
+
+                        {/* Product Details */}
+                        <div className="mt-4 w-full">
+                            <h3 className="text-lg font-bold text-gray-800">
+                                {product.product_name}
+                            </h3>
+                            <p className="text-gray-600 text-sm mt-1">
+                                <strong>WS Code:</strong> {product.ws_code}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                                <strong>Sales Price:</strong> ₹
+                                {product.sales_price}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                                <strong>MRP:</strong> ₹{product.mrp}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                                <strong>Package Size:</strong>{" "}
+                                {product.package_size}
+                            </p>
+                            <p className="text-gray-600 text-sm">
+                                <strong>Tags:</strong>{" "}
+                                {product.tags && product.tags.length > 0
+                                    ? product.tags.join(", ")
+                                    : "None"}
+                            </p>
+                            <p className="text-sm text-gray-600">
+                                <strong>Category:</strong>
+                                {
+                                    // Look up the category name based on the category_id of the product
+                                    categories.find(
+                                        (category) =>
+                                            category.id === product.category_id
+                                    )?.category_name || "N/A"
+                                }
+                            </p>
+                        </div>
+
+                        {/* Delete Button */}
+                        <div className="mt-4 w-full flex justify-end">
+                            <button
+                                onClick={() => handleDeleteProduct(product.id)}
+                                className="py-2 px-4 bg-red-500 text-white rounded-lg"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     </li>
                 ))}
             </ul>

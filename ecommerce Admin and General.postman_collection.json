@@ -1,0 +1,513 @@
+{
+	"info": {
+		"_postman_id": "ec02b7fb-5059-4c8a-8cdd-a3de600d7a06",
+		"name": "ecommerce Admin and General",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40921301"
+	},
+	"item": [
+		{
+			"name": "1. Signup",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "// {\r\n//     \"email\":\"Shukan@gmail.com\",\r\n//     \"password\":\"Abc@123\",\r\n//     \"role\":\"customer\"\r\n// }\r\n\r\n// {\r\n//     \"email\":\"dev@gmail.com\",\r\n//     \"password\":\"Abc@123\",\r\n//     \"role\":\"admin\"\r\n// }\r\n\r\n{\r\n    \"email\":\"chintan@gmail.com\",\r\n    \"password\":\"Abc@123\",\r\n    \"role\":\"customer\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/signup",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"signup"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "2. Login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\":\"dev@gmail.com\",\r\n    \"password\":\"Abc@123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/auth/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "3. Create Product",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzYxOTc1LCJleHAiOjE3MzY3NjU1NzV9.zaccnjn9CryiMI9399mQk6hiLKTwmpR-uBsE9ILgynE",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzU4MjQ4LCJleHAiOjE3MzY3NjE4NDh9.5vt9x9Q_Yo0yXAtqN3D4-zRcbPFBaEYlRD5-nfdJA-w",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "product_name",
+							"value": " r6 mark ii",
+							"contentType": "",
+							"type": "text"
+						},
+						{
+							"key": "ws_code",
+							"value": " 12345",
+							"contentType": "",
+							"type": "text"
+						},
+						{
+							"key": "sales_price",
+							"value": " 200000",
+							"type": "text"
+						},
+						{
+							"key": "mrp",
+							"value": " 250000",
+							"type": "text"
+						},
+						{
+							"key": "package_size",
+							"value": " 1",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "astro,sports",
+							"type": "text"
+						},
+						{
+							"key": "category_id",
+							"value": " 2",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": [
+								"/C:/Users/Medkart/Downloads/r6 mark ii 4.jpg",
+								"/C:/Users/Medkart/Downloads/binoculars.webp"
+							]
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/products/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "4. Create Category",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzU5MjQzLCJleHAiOjE3MzY3NjI4NDN9.BcfXSXLVTNckCDJgYJfGly9AD4nsJzW7-Mcg4pDXQTE",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"category_name\":\"Sports\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/products/newCategory",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"newCategory"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "5. Get all Products",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NTA4NzA3LCJleHAiOjE3MzY1MTIzMDd9.AbxvDtPQXiCkQNpxbZgO1dOgmANJ07eUPCJCb28axFM",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/products",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "6. Get Product by id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzQzNjA3LCJleHAiOjE3MzY3NDcyMDd9.7sgTg3gCiQzWGrqptBeZAKeCBXXLfIZ3fSUwZk23fN8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/products/id/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"id",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "7. Delete Product",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/products/2",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "8. Update Product old",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"product_name\": \"Sample Product\",\r\n  \"ws_code\": 12345,\r\n  \"sales_price\": 100,\r\n  \"mrp\": 150,\r\n  \"package_size\": 500,\r\n  \"images\": [\r\n    \"http://example.com/sample-product-image1.jpg\",\r\n    \"http://example.com/sample-product-image2.jpg\",\r\n    \"http://example.com/sample-product-image3.jpg\"\r\n  ],\r\n  \"tags\": [\r\n    \"sample\",\r\n    \"product\",\r\n    \"new\",\r\n    \"featured\"\r\n  ],\r\n  \"category_id\": 2\r\n}\r\n",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/products/3",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "9. Get All Users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/admin/users",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"admin",
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "10. Get Product by Product name Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzQzNjA3LCJleHAiOjE3MzY3NDcyMDd9.7sgTg3gCiQzWGrqptBeZAKeCBXXLfIZ3fSUwZk23fN8",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/products/product_name/7d mark ii",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"product_name",
+						"7d mark ii"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "11. Get Product by WS Code",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5000/api/products/ws_code/12345",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"ws_code",
+						"12345"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "12. Get Categories",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzUyMTQ2LCJleHAiOjE3MzY3NTU3NDZ9.TWemTdW7Q5hvP0YFTWY1uJEul2QkaNeh7Vs_sORxsPg",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/products/categories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "12. Get Categories Copy",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzUyMTQ2LCJleHAiOjE3MzY3NTU3NDZ9.TWemTdW7Q5hvP0YFTWY1uJEul2QkaNeh7Vs_sORxsPg",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:5000/api/products/categories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "13. Update Product new",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzY4NDI3LCJleHAiOjE3MzY3NzIwMjd9.cQDQ2g4sd39KX9_1NQnE6UsaI5Pmr6laWukINO7jZAo",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzU4MjQ4LCJleHAiOjE3MzY3NjE4NDh9.5vt9x9Q_Yo0yXAtqN3D4-zRcbPFBaEYlRD5-nfdJA-w",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "product_name",
+							"value": " r6 mark iii",
+							"contentType": "",
+							"type": "text"
+						},
+						{
+							"key": "ws_code",
+							"value": " 12345",
+							"contentType": "",
+							"type": "text"
+						},
+						{
+							"key": "sales_price",
+							"value": " 200000",
+							"type": "text"
+						},
+						{
+							"key": "mrp",
+							"value": " 250",
+							"type": "text"
+						},
+						{
+							"key": "package_size",
+							"value": " 1",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "astro,sports,birds",
+							"type": "text"
+						},
+						{
+							"key": "category_id",
+							"value": " 2",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/C:/Users/Medkart/Downloads/r6 mark ii 4.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/products/14",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"products",
+						"14"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

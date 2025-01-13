@@ -1,4 +1,3 @@
-import { log } from "console";
 import { pool } from "../db/db.mjs";
 import multer from "multer";
 import path from "path";
@@ -17,58 +16,55 @@ const upload = multer({ storage: storage }).array("images", 10); // Limit to 10 
 
 const createProduct = async (req, res) => {
     upload(req, res, async (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ message: "Error uploading images." });
-      }
-  
-      try {
-        const {
-          product_name,
-          ws_code,
-          sales_price,
-          mrp,
-          package_size,
-          tags, // Received as a string, e.g., '["astro","sports"]'
-          category_id,
-        } = req.body;
-  log(req.body)
-  // Parse tags into an array if it's a JSON string
-  const parsedTags = tags.split(',');
-  log(parsedTags)
-  
-        const images = req.files
-          ? req.files.map((file) => `/uploads/${file.filename}`)
-          : [];
-  
-        if (images.length === 0) {
-          return res
-            .status(400)
-            .json({ message: "At least one image is required." });
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error uploading images." });
         }
-  
-        const result = await pool.query(
-          "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-          [
-            product_name,
-            ws_code,
-            sales_price,
-            mrp,
-            package_size,
-            images, // Array of image URLs
-            parsedTags, // PostgreSQL expects an array
-            category_id,
-          ]
-        );
-  
-        res.status(201).json(result.rows[0]);
-      } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Error creating product" });
-      }
+
+        try {
+            const {
+                product_name,
+                ws_code,
+                sales_price,
+                mrp,
+                package_size,
+                tags, // Received as a string, e.g., '["astro","sports"]'
+                category_id,
+            } = req.body;
+            // Parse tags into an array if it's a JSON string
+            const parsedTags = tags.split(",");
+
+            const images = req.files
+                ? req.files.map((file) => `/uploads/${file.filename}`)
+                : [];
+
+            if (images.length === 0) {
+                return res
+                    .status(400)
+                    .json({ message: "At least one image is required." });
+            }
+
+            const result = await pool.query(
+                "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+                [
+                    product_name,
+                    ws_code,
+                    sales_price,
+                    mrp,
+                    package_size,
+                    images, // Array of image URLs
+                    parsedTags, // PostgreSQL expects an array
+                    category_id,
+                ]
+            );
+
+            res.status(201).json(result.rows[0]);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Error creating product" });
+        }
     });
-  };
-  
+};
 
 const getProductsByName = async (req, res) => {
     const { product_name } = req.params;
@@ -190,45 +186,98 @@ const deleteProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    const { id } = req.params;
-    const {
-        product_name,
-        ws_code,
-        sales_price,
-        mrp,
-        package_size,
-        images,
-        tags,
-        category_id,
-    } = req.body;
+    // const { id } = req.params;
+    // const {
+    //     product_name,
+    //     ws_code,
+    //     sales_price,
+    //     mrp,
+    //     package_size,
+    //     tags,
+    //     category_id,
+    // } = req.body;
+    // console.log(req.body);
+    // try {
+    // const result = await pool.query(
+    //     "UPDATE Products SET product_name = $1, ws_code = $2, sales_price = $3, mrp = $4, package_size = $5, images = $6, tags = $7, category_id = $8 WHERE id = $9 RETURNING *",
+    //     [
+    //         product_name,
+    //         ws_code,
+    //         sales_price,
+    //         mrp,
+    //         package_size,
+    //         images,
+    //         tags,
+    //         category_id,
+    //         id,
+    //     ]
+    // );
 
-    try {
-        const result = await pool.query(
-            "UPDATE Products SET product_name = $1, ws_code = $2, sales_price = $3, mrp = $4, package_size = $5, images = $6, tags = $7, category_id = $8 WHERE id = $9 RETURNING *",
-            [
+    //     const product = result.rows[0];
+
+    //     if (!product) {
+    //         return res.status(404).json({ error: "Product not found" });
+    //     }
+
+    //     res.status(200).json(product);
+    // } catch (err) {
+    //     res.status(500).json({ error: "Error updating product" });
+    //     console.log(err);
+    // }
+
+    const { id } = req.params;
+    console.log(id);
+
+    upload(req, res, async (err) => {
+        if (err) {
+            console.error(err);
+            return res.status(500).json({ message: "Error uploading images." });
+        }
+
+        try {
+            const {
                 product_name,
                 ws_code,
                 sales_price,
                 mrp,
                 package_size,
-                images,
-                tags,
+                tags, // Received as a string, e.g., '["astro","sports"]'
                 category_id,
-                id,
-            ]
-        );
+            } = req.body;
+            // Parse tags into an array if it's a JSON string
+            const parsedTags = tags.split(",");
 
-        const product = result.rows[0];
+            const images = req.files
+                ? req.files.map((file) => `/uploads/${file.filename}`)
+                : [];
 
-        if (!product) {
-            return res.status(404).json({ error: "Product not found" });
+            if (images.length === 0) {
+                return res
+                    .status(400)
+                    .json({ message: "At least one image is required." });
+            }
+
+            const result = await pool.query(
+                "UPDATE Products SET product_name = $1, ws_code = $2, sales_price = $3, mrp = $4, package_size = $5, images = $6, tags = $7, category_id = $8 WHERE id = $9 RETURNING *",
+                [
+                    product_name,
+                    ws_code,
+                    sales_price,
+                    mrp,
+                    package_size,
+                    images,
+                    parsedTags,
+                    category_id,
+                    id,
+                ]
+            );
+
+            res.status(201).json(result.rows[0]);
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ message: "Error creating product" });
         }
-
-        res.status(200).json(product);
-    } catch (err) {
-        res.status(500).json({ error: "Error updating product" });
-        console.log(err);
-    }
+    });
 };
 export {
     createProduct,
