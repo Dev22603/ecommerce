@@ -1,100 +1,74 @@
+import { log } from "console";
 import { pool } from "../db/db.mjs";
 import multer from "multer";
 import path from "path";
-// Set up multer storage for images
+
+// Configure storage for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Save images in the "uploads" directory
+        cb(null, "uploads/");
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+        cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
 
 const upload = multer({ storage: storage }).array("images", 10); // Limit to 10 images
 
-// Product creation route
 const createProduct = async (req, res) => {
-    const {
-        product_name,
-        ws_code,
-        sales_price,
-        mrp,
-        package_size,
-        tags,
-        category_id,
-    } = req.body;
-
-    const images = req.files
-        ? req.files.map((file) => `/uploads/${file.filename}`)
-        : []; // Store the file paths/URLs
-
-    if (images.length === 0) {
-        console.log({ error: "At least one image is required." });
-        return res
+    upload(req, res, async (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ message: "Error uploading images." });
+      }
+  
+      try {
+        const {
+          product_name,
+          ws_code,
+          sales_price,
+          mrp,
+          package_size,
+          tags, // Received as a string, e.g., '["astro","sports"]'
+          category_id,
+        } = req.body;
+  log(req.body)
+  // Parse tags into an array if it's a JSON string
+  const parsedTags = tags.split(',');
+  log(parsedTags)
+  
+        const images = req.files
+          ? req.files.map((file) => `/uploads/${file.filename}`)
+          : [];
+  
+        if (images.length === 0) {
+          return res
             .status(400)
             .json({ message: "At least one image is required." });
-    }
-
-    try {
+        }
+  
         const result = await pool.query(
-            "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-            [
-                product_name,
-                ws_code,
-                sales_price,
-                mrp,
-                package_size,
-                images, // Store image URLs in the database
-                tags,
-                category_id,
-            ]
+          "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+          [
+            product_name,
+            ws_code,
+            sales_price,
+            mrp,
+            package_size,
+            images, // Array of image URLs
+            parsedTags, // PostgreSQL expects an array
+            category_id,
+          ]
         );
+  
         res.status(201).json(result.rows[0]);
-    } catch (err) {
+      } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error creating product" });
-    }
-};
-
-// Product upload route with multer middleware
-// app.post("/api/products", upload, createProduct);
-
-// const createProduct = async (req, res) => {
-//     const {
-//         product_name,
-//         ws_code,
-//         sales_price,
-//         mrp,
-//         package_size,
-//         images,
-//         tags,
-//         category_id,
-//     } = req.body;
-//     console.log(req.body);
-
-//     try {
-//         const result = await pool.query(
-//             "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-//             [
-//                 product_name,
-//                 ws_code,
-//                 sales_price,
-//                 mrp,
-//                 package_size,
-//                 images,
-//                 tags,
-//                 category_id,
-//             ]
-//         );
-
-//         const product = result.rows[0];
-//         res.status(201).json(product);
-//     } catch (err) {
-//         res.status(500).json({ error: "Error creating product" });
-//         console.log(err);
-//     }
-// };
+      }
+    });
+  };
+  
 
 const getProductsByName = async (req, res) => {
     const { product_name } = req.params;
