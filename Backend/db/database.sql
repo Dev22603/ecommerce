@@ -18,6 +18,7 @@ CREATE TABLE Products (
 
 CREATE TABLE Users (
     id SERIAL PRIMARY KEY,                    -- Auto-incremented user ID
+    -- username VARCHAR(255) NOT NULL UNIQUE,    -- Username is user
     email VARCHAR(255) NOT NULL UNIQUE,        -- Email, must be unique and not null
     password VARCHAR(255) NOT NULL,            -- Password, not null
     role VARCHAR(10) CHECK (role IN ('admin', 'customer')) NOT NULL -- Role, must be 'Admin' or 'Customer'
