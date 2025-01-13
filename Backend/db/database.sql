@@ -1,6 +1,6 @@
 CREATE TABLE Categories (
 id Serial Primary key,
-category_name varchar(255) not null
+category_name varchar(255) not null unique
 
 );
 

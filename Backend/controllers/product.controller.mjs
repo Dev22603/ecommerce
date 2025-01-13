@@ -1,5 +1,19 @@
 import { pool } from "../db/db.mjs";
+import multer from "multer";
+import path from "path";
+// Set up multer storage for images
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, "uploads/"); // Save images in the "uploads" directory
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    },
+});
 
+const upload = multer({ storage: storage }).array("images", 10); // Limit to 10 images
+
+// Product creation route
 const createProduct = async (req, res) => {
     const {
         product_name,
@@ -7,10 +21,21 @@ const createProduct = async (req, res) => {
         sales_price,
         mrp,
         package_size,
-        images,
         tags,
         category_id,
     } = req.body;
+
+    const images = req.files
+        ? req.files.map((file) => `/uploads/${file.filename}`)
+        : []; // Store the file paths/URLs
+
+    if (images.length === 0) {
+        console.log({ error: "At least one image is required." });
+        return res
+            .status(400)
+            .json({ message: "At least one image is required." });
+    }
+
     try {
         const result = await pool.query(
             "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
@@ -20,16 +45,98 @@ const createProduct = async (req, res) => {
                 sales_price,
                 mrp,
                 package_size,
-                images,
+                images, // Store image URLs in the database
                 tags,
                 category_id,
             ]
         );
-
-        const product = result.rows[0];
-        res.status(201).json(product);
+        res.status(201).json(result.rows[0]);
     } catch (err) {
-        res.status(500).json({ error: "Error creating product" });
+        console.error(err);
+        res.status(500).json({ message: "Error creating product" });
+    }
+};
+
+// Product upload route with multer middleware
+// app.post("/api/products", upload, createProduct);
+
+// const createProduct = async (req, res) => {
+//     const {
+//         product_name,
+//         ws_code,
+//         sales_price,
+//         mrp,
+//         package_size,
+//         images,
+//         tags,
+//         category_id,
+//     } = req.body;
+//     console.log(req.body);
+
+//     try {
+//         const result = await pool.query(
+//             "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
+//             [
+//                 product_name,
+//                 ws_code,
+//                 sales_price,
+//                 mrp,
+//                 package_size,
+//                 images,
+//                 tags,
+//                 category_id,
+//             ]
+//         );
+
+//         const product = result.rows[0];
+//         res.status(201).json(product);
+//     } catch (err) {
+//         res.status(500).json({ error: "Error creating product" });
+//         console.log(err);
+//     }
+// };
+
+const getProductsByName = async (req, res) => {
+    const { product_name } = req.params;
+
+    try {
+        const result = await pool.query(
+            "SELECT * FROM Products WHERE product_name ILIKE $1",
+            [`%${product_name}%`]
+        );
+        const products = result.rows;
+
+        if (products.length === 0) {
+            return res
+                .status(404)
+                .json({ error: "No products found matching the name" });
+        }
+
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching products by name" });
+        console.log(err);
+    }
+};
+const getProductsByWsCode = async (req, res) => {
+    const { ws_code } = req.params;
+
+    try {
+        const result = await pool.query(
+            "SELECT * FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1",
+            [`%${ws_code}%`]
+        );
+        const products = result.rows;
+
+        if (products.length === 0) {
+            return res
+                .status(404)
+                .json({ error: "No products found matching the ws_code" });
+        }
+
+        res.status(200).json(products);
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching products by ws_code" });
         console.log(err);
     }
 };
@@ -75,6 +182,16 @@ const getProductById = async (req, res) => {
         res.status(200).json(product);
     } catch (err) {
         res.status(500).json({ error: "Error fetching product" });
+    }
+};
+
+const getCategories = async (req, res) => {
+    try {
+        const result = await pool.query("SELECT * FROM Categories");
+        res.status(200).json(result.rows);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: "Error fetching categories" });
     }
 };
 
@@ -136,8 +253,7 @@ const updateProduct = async (req, res) => {
         res.status(200).json(product);
     } catch (err) {
         res.status(500).json({ error: "Error updating product" });
-		console.log(err);
-		
+        console.log(err);
     }
 };
 export {
@@ -146,5 +262,8 @@ export {
     getAllProducts,
     getProductById,
     deleteProduct,
-	updateProduct
+    updateProduct,
+    getProductsByName,
+    getProductsByWsCode,
+    getCategories,
 };
