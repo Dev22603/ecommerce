@@ -79,24 +79,93 @@ const addItemToCart = async (req, res) => {
 // 	}
 // };
 
-// Get user's cart
 
+
+
+// Get user's cart v1
+// const getCart = async (req, res) => {
+// 	const user_id = req.user.id; // assuming you have user info from JWT token
+
+// 	try {
+// 		const result = await pool.query(
+// 			`SELECT c.id, c.quantity, p.product_name
+//             FROM Carts c
+//             JOIN Products p ON c.product_id = p.id
+//             WHERE c.user_id = $1`,
+// 			[user_id]
+// 		);
+// 		res.status(200).json(result.rows);
+// 	} catch (error) {
+// 		res.status(500).json({ message: "Error fetching cart", error });
+// 	}
+// };
+
+
+
+// Get user's cart with pagination v2
+// Get user's cart with pagination and additional product details
 const getCart = async (req, res) => {
-	const user_id = req.user.id; // assuming you have user info from JWT token
+    const user_id = req.user.id; // assuming user info is available from JWT token
+    
+    // Extract page and limit from query parameters, default to page=1, limit=10 if not provided
+    const { page = 1, limit = 10 } = req.query;
 
-	try {
-		const result = await pool.query(
-			`SELECT c.id, c.quantity, p.product_name
-            FROM Carts c
-            JOIN Products p ON c.product_id = p.id
-            WHERE c.user_id = $1`,
-			[user_id]
-		);
-		res.status(200).json(result.rows);
-	} catch (error) {
-		res.status(500).json({ message: "Error fetching cart", error });
-	}
+    // Ensure that page and limit are valid integers
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+
+    if (isNaN(pageNum) || isNaN(limitNum) || pageNum < 1 || limitNum < 1) {
+        return res.status(400).json({ message: "Invalid pagination parameters" });
+    }
+
+    try {
+        // Calculate offset based on page and limit
+        const offset = (pageNum - 1) * limitNum;
+
+        // Query to fetch cart items with product details, including product_id and sales_price
+        const result = await pool.query(
+            `SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.product_name, p.sales_price
+             FROM Carts c
+             JOIN Products p ON c.product_id = p.id
+             WHERE c.user_id = $1
+             ORDER BY c.created_at DESC
+             LIMIT $2 OFFSET $3`,
+            [user_id, limitNum, offset]
+        );
+
+        // Query to get the total count of cart items for pagination
+        const countResult = await pool.query(
+            `SELECT COUNT(*) AS total
+             FROM Carts c
+             WHERE c.user_id = $1`,
+            [user_id]
+        );
+
+        const totalItems = parseInt(countResult.rows[0].total);
+        const totalPages = Math.ceil(totalItems / limitNum);
+
+        // If no cart items are found
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: "Cart is empty" });
+        }
+
+        // Respond with the paginated cart items and pagination info
+        res.status(200).json({
+            page: pageNum,
+            limit: limitNum,
+            totalItems,
+            totalPages,
+            cartItems: result.rows,
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            message: "Error fetching cart",
+            error,
+        });
+    }
 };
+
 
 // Update cart item
 const updateCart = async (req, res) => {
