@@ -1,4 +1,5 @@
-// routes/authRoutes.js
+// routes/user.routes.mjs
+
 import express from "express";
 import { signup, login, getAllUsers } from '../controllers/user.controllers.mjs';
 

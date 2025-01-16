@@ -1,3 +1,5 @@
+// Backend\middlewares\auth.mjs
+
 import jwt from "jsonwebtoken";
 
 export const authenticate = (req, res, next) => {

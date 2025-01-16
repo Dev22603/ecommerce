@@ -1,3 +1,4 @@
+// Backend\routes\product.routes.mjs
 import express from "express";
 import {
     createProduct,

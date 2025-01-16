@@ -1,4 +1,4 @@
-// routes/authRoutes.js
+// routes/admin.user.routes.mjs
 import express from "express";
 import { getAllUsers } from '../controllers/user.controllers.mjs';
 
