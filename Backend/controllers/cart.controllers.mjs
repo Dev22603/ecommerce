@@ -1,3 +1,4 @@
+// Backend\controllers\cart.controllers.mjs
 import { pool } from "../db/db.mjs";
 
 // Add to Cart insppired by Amazon
@@ -122,9 +123,15 @@ const getCart = async (req, res) => {
         // Calculate offset based on page and limit
         const offset = (pageNum - 1) * limitNum;
 
-        // Query to fetch cart items with product details, including product_id and sales_price
+        // Query to fetch cart items with product details, including product_id, sales_price, and total_price
         const result = await pool.query(
-            `SELECT c.id AS cart_id, c.quantity, p.id AS product_id, p.product_name, p.sales_price
+            `SELECT 
+                c.id AS cart_id, 
+                c.quantity, 
+                p.id AS product_id, 
+                p.product_name, 
+                p.sales_price, 
+                (c.quantity * p.sales_price) AS total_price
              FROM Carts c
              JOIN Products p ON c.product_id = p.id
              WHERE c.user_id = $1
@@ -149,12 +156,16 @@ const getCart = async (req, res) => {
             return res.status(404).json({ message: "Cart is empty" });
         }
 
-        // Respond with the paginated cart items and pagination info
+        // Calculate grand total for all items in the current page
+        const grandTotal = result.rows.reduce((sum, item) => sum + item.total_price, 0);
+
+        // Respond with the paginated cart items and additional information
         res.status(200).json({
             page: pageNum,
             limit: limitNum,
             totalItems,
             totalPages,
+            grandTotal,
             cartItems: result.rows,
         });
     } catch (error) {

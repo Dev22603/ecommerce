@@ -1,3 +1,4 @@
+// Backend\controllers\order.controller.mjs
 import { pool } from "../db/db.mjs";
 
 // Create order from cart
@@ -286,6 +287,13 @@ const cancelOrder = async (req, res) => {
             return res
                 .status(404)
                 .json({ message: "Order not found or access denied" });
+        }
+        const orderStatus = orderCheck.rows[0].status; // Retrieve the status of the order
+
+        if (orderStatus !== "Pending") {
+            return res
+                .status(400)
+                .json({ message: "Cannot cancel order that is not pending." });
         }
 
         // Delete the order and related items

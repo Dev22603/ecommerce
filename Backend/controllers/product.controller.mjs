@@ -1,3 +1,5 @@
+// Backend\controllers\product.controller.mjs
+
 import { pool } from "../db/db.mjs";
 import multer from "multer";
 import path from "path";
@@ -128,12 +130,37 @@ const createCategory = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM Products");
-        res.status(200).json(result.rows);
+        // Get page and limit from query parameters (with default values)
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+
+        // Calculate the offset for the query
+        const offset = (page - 1) * limit;
+
+        // Fetch the products with pagination
+        const result = await pool.query(
+            "SELECT * FROM Products LIMIT $1 OFFSET $2", 
+            [limit, offset]
+        );
+
+        // Fetch total count for pagination information
+        const totalCountResult = await pool.query("SELECT COUNT(*) FROM Products");
+        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
+
+        // Send response with data and pagination info
+        res.status(200).json({
+            products: result.rows,
+            totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
+        });
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: "Error fetching products" });
     }
 };
+
 
 const getProductById = async (req, res) => {
     const { id } = req.params;
