@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "// {\r\n//     \"email\":\"Shukan@gmail.com\",\r\n//     \"password\":\"Abc@123\",\r\n//     \"role\":\"customer\"\r\n// }\r\n\r\n// {\r\n//     \"email\":\"dev@gmail.com\",\r\n//     \"password\":\"Abc@123\",\r\n//     \"role\":\"admin\"\r\n// }\r\n\r\n{\r\n    \"email\":\"chintan@gmail.com\",\r\n    \"password\":\"Abc@123\",\r\n    \"role\":\"customer\"\r\n}",
+					"raw": "// {\r\n//     \"name\": \"Dev Sharma\",\r\n//     \"email\": \"dev@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"admin\"  \r\n// }\r\n// {\r\n//     \"name\": \"Aarav Patel\",\r\n//     \"email\": \"aarav.patel@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Isha Gupta\",\r\n//     \"email\": \"isha.gupta@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Rohan Verma\",\r\n//     \"email\": \"rohan.verma@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Sneha Iyer\",\r\n//     \"email\": \"sneha.iyer@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Vikram Yadav\",\r\n//     \"email\": \"vikram.yadav@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Priya Singh\",\r\n//     \"email\": \"priya.singh@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Ankit Kumar\",\r\n//     \"email\": \"ankit.kumar@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Madhuri Reddy\",\r\n//     \"email\": \"madhuri.reddy@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Rahul Mehta\",\r\n//     \"email\": \"rahul.mehta@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -38,6 +38,28 @@
 		},
 		{
 			"name": "2. Login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Assuming the response contains the JSON with the 'token' field\r",
+							"let responseJson = pm.response.json();\r",
+							"\r",
+							"// Check if the token exists and save it to the 'ecommerce' environment variable\r",
+							"if (responseJson.token) {\r",
+							"    pm.environment.set(\"AuthToken\", responseJson.token);\r",
+							"    console.log(\"Token saved to ecommerce environment variable: AuthToken\");\r",
+							"} else {\r",
+							"    console.log(\"Token not found in the response.\");\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
