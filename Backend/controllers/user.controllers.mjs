@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { pool } from "../db/db.mjs";
 
 const signup = async (req, res) => {
-	const { email, password, role } = req.body;
+	const { name, email, password, role } = req.body;
 	console.log(req.body);
 
 	try {
@@ -34,13 +34,13 @@ const signup = async (req, res) => {
 
 		// Insert the new user into the database
 		const newUser = await pool.query(
-			"INSERT INTO Users (email, password, role) VALUES ($1, $2, $3) RETURNING id, email, role",
-			[email, hashedPassword, role]
+			"INSERT INTO Users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
+			[name, email, hashedPassword, role]
 		);
 		const user = newUser.rows[0];
 		res.status(201).json({
 			id: user.id,
-			username: user.username,
+			name: user.name,
 			email: user.email,
 			role: user.role,
 		});
