@@ -22,8 +22,6 @@ router.patch(
     authorize(["admin"]),
     updateOrderStatus
 );
-
-// Get all orders (Admin Only)
 router.get("/admin/all", authenticate, authorize(["admin"]), getAllOrders);
 
 export default router;

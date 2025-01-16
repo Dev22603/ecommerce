@@ -93,16 +93,26 @@ const createOrder = async (req, res) => {
 //         res.status(500).json({ message: "Error fetching orders", error });
 //     }
 // };
-// Get user's orders v2
+
+// Get user's orders v2 pagination
 const getUserOrders = async (req, res) => {
-    const user_id = req.user.id; // assuming you have user info from JWT token
+    const user_id = req.user.id; // Assuming the user info is provided by JWT token
     const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
 
     try {
-        // Calculate offset based on page and limit
-        const offset = (page - 1) * limit;
+        // Validate page and limit
+        const validatedPage = Math.max(1, parseInt(page, 10) || 1);
+        const validatedLimit = Math.max(1, parseInt(limit, 10) || 10);
+        const offset = (validatedPage - 1) * validatedLimit;
 
-        // Query to get orders with order details (similar to getOrderDetails)
+        // Query to get total orders count for pagination
+        const totalCountResult = await pool.query(
+            `SELECT COUNT(*) FROM Orders WHERE user_id = $1`,
+            [user_id]
+        );
+        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
+
+        // Query to fetch the user's paginated orders with order details
         const result = await pool.query(
             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
                     oi.product_id, oi.quantity, p.product_name, p.sales_price
@@ -112,7 +122,7 @@ const getUserOrders = async (req, res) => {
              WHERE o.user_id = $1
              ORDER BY o.created_at DESC
              LIMIT $2 OFFSET $3`,
-            [user_id, limit, offset]
+            [user_id, validatedLimit, offset]
         );
 
         // If no orders are found
@@ -120,9 +130,8 @@ const getUserOrders = async (req, res) => {
             return res.status(404).json({ message: "No orders found" });
         }
 
-        // Group the orders by order_id and accumulate order items under each order
+        // Group orders by order_id and accumulate order items under each order
         const orders = result.rows.reduce((acc, row) => {
-            // If the order already exists, add the item to its order_items
             const existingOrder = acc.find(
                 (order) => order.order_id === row.order_id
             );
@@ -134,7 +143,6 @@ const getUserOrders = async (req, res) => {
                     sales_price: row.sales_price,
                 });
             } else {
-                // Otherwise, create a new order entry
                 acc.push({
                     order_id: row.order_id,
                     user_id: row.user_id,
@@ -155,16 +163,18 @@ const getUserOrders = async (req, res) => {
             return acc;
         }, []);
 
-        // Respond with the paginated orders
+        // Respond with paginated orders and metadata
         res.status(200).json({
-            page: parseInt(page),
-            limit: parseInt(limit),
+            page: validatedPage,
+            limit: validatedLimit,
+            total_count: totalCount,
+            total_pages: Math.ceil(totalCount / validatedLimit),
             orders: orders,
         });
     } catch (error) {
+        console.error("Error fetching user orders:", error);
         res.status(500).json({
-            message: "Error fetching orders",
-            error,
+            message: "An error occurred while fetching user orders",
         });
     }
 };
@@ -325,13 +335,12 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-
 // // Get All Orders (Admin Only) v1
 // const getAllOrders = async (req, res) => {
 //     try {
 //         const result = await pool.query(
-//             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
-//                     u.name AS user_name, o.status 
+//             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
+//                     u.name AS user_name, o.status
 //              FROM Orders o
 //              JOIN Users u ON o.user_id = u.id`
 //         );
@@ -341,11 +350,22 @@ const updateOrderStatus = async (req, res) => {
 //     }
 // };
 
-
-
 // Get All Orders (Admin Only) v2
 const getAllOrders = async (req, res) => {
-    const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
+    let { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
+
+    // Validate page and limit to ensure they are numbers and positive
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+        return res.status(400).json({ message: "Invalid page number" });
+    }
+
+    if (isNaN(limit) || limit < 1) {
+        return res.status(400).json({ message: "Invalid limit number" });
+    }
+
     try {
         // Calculate offset based on page and limit
         const offset = (page - 1) * limit;
@@ -364,6 +384,16 @@ const getAllOrders = async (req, res) => {
             [limit, offset]
         );
 
+        // Query to fetch total number of orders for pagination
+        const totalCountResult = await pool.query(
+            `SELECT COUNT(DISTINCT o.id) AS total_orders
+             FROM Orders o`
+        );
+
+        const totalOrders = parseInt(totalCountResult.rows[0].total_orders, 10);
+
+        const totalPages = Math.ceil(totalOrders / limit);
+
         // If no orders are found
         if (result.rows.length === 0) {
             return res.status(404).json({ message: "No orders found" });
@@ -372,10 +402,14 @@ const getAllOrders = async (req, res) => {
         // Group orders by user_id and then by order_id, accumulating order items under each order
         const users = result.rows.reduce((acc, row) => {
             // If the user already exists, we check for the order and add the item to it
-            const existingUser = acc.find((user) => user.user_id === row.user_id);
+            const existingUser = acc.find(
+                (user) => user.user_id === row.user_id
+            );
             if (existingUser) {
                 // If the order already exists, add the item to its order_items
-                const existingOrder = existingUser.orders.find((order) => order.order_id === row.order_id);
+                const existingOrder = existingUser.orders.find(
+                    (order) => order.order_id === row.order_id
+                );
                 if (existingOrder) {
                     existingOrder.order_items.push({
                         product_id: row.product_id,
@@ -387,10 +421,10 @@ const getAllOrders = async (req, res) => {
                     // If the order does not exist, create a new order and add the item
                     existingUser.orders.push({
                         order_id: row.order_id,
-                        // user_id: row.user_id,
-                        // user_name: row.user_name,
                         total_amount: parseFloat(row.total_amount),
-                        created_at: new Date(row.created_at).toLocaleDateString("en-GB"),
+                        created_at: new Date(row.created_at).toLocaleDateString(
+                            "en-GB"
+                        ),
                         status: row.status,
                         order_items: [
                             {
@@ -410,10 +444,10 @@ const getAllOrders = async (req, res) => {
                     orders: [
                         {
                             order_id: row.order_id,
-                            // user_id: row.user_id,
-                            // user_name: row.user_name,
                             total_amount: parseFloat(row.total_amount),
-                            created_at: new Date(row.created_at).toLocaleDateString("en-GB"),
+                            created_at: new Date(
+                                row.created_at
+                            ).toLocaleDateString("en-GB"),
                             status: row.status,
                             order_items: [
                                 {
@@ -432,8 +466,10 @@ const getAllOrders = async (req, res) => {
 
         // Respond with the paginated orders grouped by user_id
         res.status(200).json({
-            page: parseInt(page),
-            limit: parseInt(limit),
+            page: page,
+            limit: limit,
+            totalOrders: totalOrders,
+            totalPages: totalPages,
             users: users,
         });
     } catch (error) {
