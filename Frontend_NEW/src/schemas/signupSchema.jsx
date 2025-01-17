@@ -4,7 +4,7 @@ export const signUpSchema = Yup.object({
 	name: Yup.string().min(2).max(25).required("Please enter your name"),
 	email: Yup.string().email().required("Please enter your email"),
 	password: Yup.string()
-		.min(8)
+		.min(6)
 		.required("Please enter your password")
 		.matches(/[0-9]/, "At least one digit (0-9)")
 		.matches(/[a-z]/, "At least one lowercase")
