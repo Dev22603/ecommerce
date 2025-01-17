@@ -37,7 +37,7 @@ const upload = multer({
     storage: storage,
     limits: { fileSize: 10 * 1024 * 1024 },
     fileFilter: fileFilter,
-}).array("images");
+}).array("images", 5);
 // Limit to 5 images
 
 const createProduct = async (req, res) => {
@@ -46,6 +46,9 @@ const createProduct = async (req, res) => {
             console.error(err);
             return res.status(500).json({ message: "Error uploading images." });
         }
+        console.log(req.body);
+        console.log(req.file);
+        console.log(req.files);
 
         try {
             const {
@@ -59,6 +62,7 @@ const createProduct = async (req, res) => {
             } = req.body;
             // Parse tags into an array if it's a JSON string
             const parsedTags = tags.split(",");
+            console.log(parsedTags);
 
             const imageURLs = req.files
                 ? req.files.map((file) => `/uploads/${file.filename}`)
