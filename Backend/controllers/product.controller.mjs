@@ -7,14 +7,38 @@ import path from "path";
 // Configure storage for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, "uploads/");
+        cb(null, "./uploads");
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
     },
 });
+const fileFilter = (req, file, cb) => {
+    const fileTypes = /jpeg|jpg|png|webp/;
+    const extname = fileTypes.test(
+        path.extname(file.originalname).toLowerCase()
+    );
+    const mimetype =
+        file.mimetype === "image/jpeg" ||
+        file.mimetype === "image/png" ||
+        file.mimetype === "image/webp";
 
-const upload = multer({ storage: storage }).array("images", 10); // Limit to 10 images
+    if (mimetype && extname) {
+        cb(null, true);
+    } else {
+        cb(
+            new Error("Only .jpeg, .jpg, .png, and .webp files are allowed!"),
+            false
+        );
+    }
+};
+
+const upload = multer({
+    storage: storage,
+    limits: { fileSize: 10 * 1024 * 1024 },
+    fileFilter: fileFilter,
+}).array("images");
+// Limit to 5 images
 
 const createProduct = async (req, res) => {
     upload(req, res, async (err) => {
@@ -36,11 +60,11 @@ const createProduct = async (req, res) => {
             // Parse tags into an array if it's a JSON string
             const parsedTags = tags.split(",");
 
-            const images = req.files
+            const imageURLs = req.files
                 ? req.files.map((file) => `/uploads/${file.filename}`)
                 : [];
 
-            if (images.length === 0) {
+            if (imageURLs.length === 0) {
                 return res
                     .status(400)
                     .json({ message: "At least one image is required." });
@@ -54,7 +78,7 @@ const createProduct = async (req, res) => {
                     sales_price,
                     mrp,
                     package_size,
-                    images, // Array of image URLs
+                    imageURLs, // Array of image URLs
                     parsedTags, // PostgreSQL expects an array
                     category_id,
                 ]
@@ -63,7 +87,7 @@ const createProduct = async (req, res) => {
             res.status(201).json(result.rows[0]);
         } catch (err) {
             console.error(err);
-            res.status(500).json({ message: "Error creating product" });
+            res.status(500).json({ message: "Error creating product", err });
         }
     });
 };
@@ -139,12 +163,14 @@ const getAllProducts = async (req, res) => {
 
         // Fetch the products with pagination
         const result = await pool.query(
-            "SELECT * FROM Products LIMIT $1 OFFSET $2", 
+            "SELECT * FROM Products LIMIT $1 OFFSET $2",
             [limit, offset]
         );
 
         // Fetch total count for pagination information
-        const totalCountResult = await pool.query("SELECT COUNT(*) FROM Products");
+        const totalCountResult = await pool.query(
+            "SELECT COUNT(*) FROM Products"
+        );
         const totalCount = parseInt(totalCountResult.rows[0].count, 10);
 
         // Send response with data and pagination info
@@ -160,7 +186,6 @@ const getAllProducts = async (req, res) => {
         res.status(500).json({ error: "Error fetching products" });
     }
 };
-
 
 const getProductById = async (req, res) => {
     const { id } = req.params;
