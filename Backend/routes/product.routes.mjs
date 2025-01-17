@@ -23,7 +23,6 @@ const router = express.Router();
 router.post("/", authenticate, authorize(["admin"]), createProduct);
 router.delete("/:id", authenticate, authorize(["admin"]), deleteProduct);
 router.put("/:id", authenticate, authorize(["admin"]), updateProduct);
-// router.get("/", authenticate, authorize(["admin", "customer"]), getAllProducts);
 router.get("/", getAllProducts);
 router.get(
     "/id/:id",

@@ -9,15 +9,17 @@ import orderRoutes from "./routes/order.routes.mjs";
 import cors from "cors";
 const app = express();
 app.use(
-	cors({
-		origin: "http://localhost:5173", // Allow this frontend origin
-		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-		credentials: true, // Allow credentials if needed
-	})
+    cors({
+        origin: "http://localhost:5173", // Allow this frontend origin
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true, // Allow credentials if needed
+    })
 );
 // Middleware
 app.use(bodyParser.json());
+// app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+app.use(express.static("uploads"));
 
 // Routes
 app.use("/api/auth", authRoutes);
