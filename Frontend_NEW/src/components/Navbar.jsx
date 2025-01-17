@@ -1,4 +1,4 @@
-// "use client";
+
 
 import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -34,7 +34,7 @@ function Navbar() {
                 <div className=" flex max-w-7xl items-center justify-between px-3 py-2 sm:px-4 lg:px-5 ">
                     <div className="inline-flex items-center space-x-2 ">
                         <Link
-                            to="/home"
+                            to="/"
                             className="hover:cursor-pointer hover:border-black hover:border-[1px] rounded-[3px]  p-1  border-transparent border-[1px]"
                         >
                             <img className="h-8 " src={logo} alt="logo" />
@@ -58,7 +58,7 @@ function Navbar() {
                                     Sign Up
                                 </button>
                             </Link>
-                            <Link to={"/"}>
+                            <Link to={"/login"}>
                                 <button
                                     type="button"
                                     className="rounded-md border border-black px-3 py-2 text-sm font-semibold text-black shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black hover:bg-green-500"
