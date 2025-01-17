@@ -61,7 +61,9 @@ const createProduct = async (req, res) => {
                 category_id,
             } = req.body;
             // Parse tags into an array if it's a JSON string
-            const parsedTags = tags.split(",");
+            // const parsedTags = tags.split(",");
+
+            const parsedTags = tags.split(",").map((tag) => tag.trim());
             console.log(parsedTags);
 
             const imageURLs = req.files
@@ -96,48 +98,124 @@ const createProduct = async (req, res) => {
     });
 };
 
+// const getProductsByName = async (req, res) => {
+//     const { product_name } = req.params;
+
+//     try {
+//         const result = await pool.query(
+//             "SELECT * FROM Products WHERE product_name ILIKE $1",
+//             [`%${product_name}%`]
+//         );
+//         const products = result.rows;
+
+//         if (products.length === 0) {
+//             return res
+//                 .status(404)
+//                 .json({ error: "No products found matching the name" });
+//         }
+
+//         res.status(200).json(products);
+//     } catch (err) {
+//         res.status(500).json({ error: "Error fetching products by name" });
+//         console.log(err);
+//     }
+// };
+// const getProductsByWsCode = async (req, res) => {
+//     const { ws_code } = req.params;
+
+//     try {
+//         const result = await pool.query(
+//             "SELECT * FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1",
+//             [`%${ws_code}%`]
+//         );
+//         const products = result.rows;
+
+//         if (products.length === 0) {
+//             return res
+//                 .status(404)
+//                 .json({ error: "No products found matching the ws_code" });
+//         }
+
+//         res.status(200).json(products);
+//     } catch (err) {
+//         res.status(500).json({ error: "Error fetching products by ws_code" });
+//         console.log(err);
+//     }
+// };
+
 const getProductsByName = async (req, res) => {
     const { product_name } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     try {
+        // Fetch products by name with pagination
         const result = await pool.query(
-            "SELECT * FROM Products WHERE product_name ILIKE $1",
+            "SELECT * FROM Products WHERE product_name ILIKE $1 LIMIT $2 OFFSET $3",
+            [`%${product_name}%`, limit, offset]
+        );
+
+        const totalCountResult = await pool.query(
+            "SELECT COUNT(*) FROM Products WHERE product_name ILIKE $1",
             [`%${product_name}%`]
         );
-        const products = result.rows;
+        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
 
-        if (products.length === 0) {
+        if (result.rows.length === 0) {
             return res
                 .status(404)
                 .json({ error: "No products found matching the name" });
         }
 
-        res.status(200).json(products);
+        res.status(200).json({
+            products: result.rows,
+            totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
+        });
     } catch (err) {
         res.status(500).json({ error: "Error fetching products by name" });
-        console.log(err);
+        console.error(err);
     }
 };
+
 const getProductsByWsCode = async (req, res) => {
     const { ws_code } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
 
     try {
+        // Fetch products by ws_code with pagination
         const result = await pool.query(
-            "SELECT * FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1",
+            "SELECT * FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1 LIMIT $2 OFFSET $3",
+            [`%${ws_code}%`, limit, offset]
+        );
+
+        const totalCountResult = await pool.query(
+            "SELECT COUNT(*) FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1",
             [`%${ws_code}%`]
         );
-        const products = result.rows;
+        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
 
-        if (products.length === 0) {
+        if (result.rows.length === 0) {
             return res
                 .status(404)
                 .json({ error: "No products found matching the ws_code" });
         }
 
-        res.status(200).json(products);
+        res.status(200).json({
+            products: result.rows,
+            totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
+        });
     } catch (err) {
         res.status(500).json({ error: "Error fetching products by ws_code" });
-        console.log(err);
+        console.error(err);
     }
 };
 
@@ -158,7 +236,7 @@ const createCategory = async (req, res) => {
 
 const getAllProducts = async (req, res) => {
     try {
-        // Get page and limit from query parameters (with default values)
+        // Extract page and limit from query parameters, default to page=1, limit=10 if not provided
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
 
