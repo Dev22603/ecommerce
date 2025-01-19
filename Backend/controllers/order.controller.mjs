@@ -489,96 +489,88 @@ const getAllOrders = async (req, res) => {
 };
 
 
-const getUserOrdersByDate = async (req, res) => {
-    const user_id = req.user.id; // Assuming the user info is provided by JWT token
-    const { page = 1, limit = 10, start_date, end_date } = req.query; // Default to page 1, limit 10
+// const searchOrdersByDate = async (req, res) => {
+//     const user_id = req.user.id; // Assuming the user info is provided by JWT token
+//     const { startDate, endDate, page = 1, limit = 10 } = req.query;
 
-    try {
-        // Validate page and limit
-        const validatedPage = Math.max(1, parseInt(page, 10) || 1);
-        const validatedLimit = Math.max(1, parseInt(limit, 10) || 10);
-        const offset = (validatedPage - 1) * validatedLimit;
+//     try {
+//         const validatedPage = Math.max(1, parseInt(page, 10) || 1);
+//         const validatedLimit = Math.max(1, parseInt(limit, 10) || 10);
+//         const offset = (validatedPage - 1) * validatedLimit;
 
-        // Construct date filter if present
-        let dateFilter = '';
-        if (start_date && end_date) {
-            // Filter by date range (start_date to end_date)
-            dateFilter = `AND o.created_at BETWEEN TO_DATE($1, 'YYYY-MM') AND TO_DATE($2, 'YYYY-MM')`;
-        }
+//         let query = `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
+//                      oi.product_id, oi.quantity, p.product_name, p.sales_price
+//                      FROM Orders o
+//                      JOIN Order_Items oi ON o.id = oi.order_id
+//                      JOIN Products p ON oi.product_id = p.id
+//                      WHERE o.user_id = $1`;
 
-        // Query to get total orders count for pagination
-        const totalCountResult = await pool.query(
-            `SELECT COUNT(*) FROM Orders o WHERE o.user_id = $3 ${dateFilter}`,
-            [start_date, end_date, user_id]
-        );
-        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
+//         const queryParams = [user_id];
 
-        // Query to fetch the user's paginated orders with order details
-        const result = await pool.query(
-            `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
-             FROM Orders o
-             JOIN Order_Items oi ON o.id = oi.order_id
-             JOIN Products p ON oi.product_id = p.id
-             WHERE o.user_id = $3 ${dateFilter}
-             ORDER BY o.created_at DESC
-             LIMIT $4 OFFSET $5`,
-            [start_date, end_date, user_id, validatedLimit, offset]
-        );
+//         if (startDate) {
+//             query += ` AND o.created_at >= $${queryParams.length + 1}`;
+//             queryParams.push(`${startDate}-01`); // Start of the selected month
+//         }
 
-        // If no orders are found
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: "No orders found" });
-        }
+//         if (endDate) {
+//             query += ` AND o.created_at <= $${queryParams.length + 1}`;
+//             queryParams.push(`${endDate}-31`); // End of the selected month
+//         }
 
-        // Group orders by order_id and accumulate order items under each order
-        const orders = result.rows.reduce((acc, row) => {
-            const existingOrder = acc.find(
-                (order) => order.order_id === row.order_id
-            );
-            if (existingOrder) {
-                existingOrder.order_items.push({
-                    product_id: row.product_id,
-                    product_name: row.product_name,
-                    quantity: row.quantity,
-                    sales_price: row.sales_price,
-                });
-            } else {
-                acc.push({
-                    order_id: row.order_id,
-                    user_id: row.user_id,
-                    total_amount: parseFloat(row.total_amount),
-                    created_at: new Date(row.created_at).toLocaleDateString(
-                        "en-GB"
-                    ),
-                    order_items: [
-                        {
-                            product_id: row.product_id,
-                            product_name: row.product_name,
-                            quantity: row.quantity,
-                            sales_price: row.sales_price,
-                        },
-                    ],
-                });
-            }
-            return acc;
-        }, []);
+//         query += ` ORDER BY o.created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+//         queryParams.push(validatedLimit, offset);
 
-        // Respond with paginated orders and metadata
-        res.status(200).json({
-            page: validatedPage,
-            limit: validatedLimit,
-            total_count: totalCount,
-            total_pages: Math.ceil(totalCount / validatedLimit),
-            orders: orders,
-        });
-    } catch (error) {
-        console.error("Error fetching user orders:", error);
-        res.status(500).json({
-            message: "An error occurred while fetching user orders",
-        });
-    }
-};
+//         const result = await pool.query(query, queryParams);
+
+//         if (result.rows.length === 0) {
+//             return res.status(404).json({ message: "No orders found" });
+//         }
+
+//         const orders = result.rows.reduce((acc, row) => {
+//             const existingOrder = acc.find(
+//                 (order) => order.order_id === row.order_id
+//             );
+//             if (existingOrder) {
+//                 existingOrder.order_items.push({
+//                     product_id: row.product_id,
+//                     product_name: row.product_name,
+//                     quantity: row.quantity,
+//                     sales_price: row.sales_price,
+//                 });
+//             } else {
+//                 acc.push({
+//                     order_id: row.order_id,
+//                     user_id: row.user_id,
+//                     total_amount: parseFloat(row.total_amount),
+//                     created_at: new Date(row.created_at).toLocaleDateString("en-GB"),
+//                     order_items: [
+//                         {
+//                             product_id: row.product_id,
+//                             product_name: row.product_name,
+//                             quantity: row.quantity,
+//                             sales_price: row.sales_price,
+//                         },
+//                     ],
+//                 });
+//             }
+//             return acc;
+//         }, []);
+
+//         res.status(200).json({
+//             page: validatedPage,
+//             limit: validatedLimit,
+//             total_count: result.rowCount,
+//             total_pages: Math.ceil(result.rowCount / validatedLimit),
+//             orders: orders,
+//         });
+//     } catch (error) {
+//         console.error("Error fetching user orders:", error);
+//         res.status(500).json({
+//             message: "An error occurred while fetching user orders",
+//         });
+//     }
+// };
+
 
 export {
     createOrder,
@@ -587,5 +579,5 @@ export {
     cancelOrder,
     updateOrderStatus,
     getAllOrders,
-    getUserOrdersByDate
+    // searchOrdersByDate
 };

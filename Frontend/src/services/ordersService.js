@@ -117,31 +117,31 @@ export const orderService = {
 		}
 	},
 	// Modified service in orderService.js
-	getUserOrdersByDate: async (
-		token,
-		page = 1,
-		limit = 5,
-		startDate,
-		endDate
-	) => {
-		try {
-			const response = await axios.get(`${API_URL}/filter`, {
-				headers: {
-					Authorization: `Bearer ${token}`,
-				},
-				withCredentials: true,
-				params: {
-					page,
-					limit,
-					start_date: startDate,
-					end_date: endDate,
-				},
-			});
-			return response.data;
-		} catch (error) {
-			throw new Error(
-				error.response?.data?.message || "Error fetching user orders"
-			);
-		}
-	},
+	// searchOrdersByDate: async (
+	// 	token,
+	// 	page = 1,
+	// 	limit = 5,
+	// 	startDate,
+	// 	endDate
+	// ) => {
+	// 	try {
+	// 		const response = await axios.get(`${API_URL}/filter`, {
+	// 			headers: {
+	// 				Authorization: `Bearer ${token}`,
+	// 			},
+	// 			withCredentials: true,
+	// 			params: {
+	// 				start_date: startDate,
+	// 				end_date: endDate,
+	// 				page,
+	// 				limit,
+	// 			},
+	// 		});
+	// 		return response.data;
+	// 	} catch (error) {
+	// 		throw new Error(
+	// 			error.response?.data?.message || "Error fetching user orders"
+	// 		);
+	// 	}
+	// },
 };
