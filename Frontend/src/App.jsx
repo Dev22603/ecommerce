@@ -10,6 +10,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ToastContainer } from "react-toastify";
 import Cart from "./pages/Cart";
+import AllOrders from "./pages/AllOrders"; // Import AllOrders page
+
 import MyOrders from "./pages/MyOrders"; // Import the new page for my orders
 
 const App = () => (
@@ -43,6 +45,14 @@ const App = () => (
 						element={
 							<ProtectedRoute>
 								<AdminDashboard />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/all-orders"
+						element={
+							<ProtectedRoute>
+								<AllOrders />
 							</ProtectedRoute>
 						}
 					/>

@@ -381,7 +381,7 @@ const updateProduct = async (req, res) => {
 				category_id,
 			} = req.body;
 			// Parse tags into an array if it's a JSON string
-			const parsedTags = tags.split(",");
+			const parsedTags = typeof tags === String ? tags.split(",") : tags;
 
 			const images = req.files
 				? req.files.map((file) => `/uploads/${file.filename}`)

@@ -4,8 +4,12 @@ import ProductForm from "../components/ProductForm";
 import ProductTable from "../components/ProductTable";
 import { adminService } from "../services/adminService";
 import { AuthContext } from "../context/AuthContext";
+import { productService } from "../services/productService";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+	const navigate = useNavigate();
+
 	const [products, setProducts] = useState([]);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
@@ -16,15 +20,14 @@ const AdminDashboard = () => {
 	const itemsPerPage = 10; // Number of products per page
 
 	useEffect(() => {
-		
 		fetchProducts(currentPage);
 		console.log(currentPage);
 	}, [currentPage]);
 
 	const fetchProducts = async (page) => {
 		try {
-			console.log("fetch",page);
-			
+			console.log("fetch", page);
+
 			const data = await adminService.getProducts(page, itemsPerPage);
 			setProducts(data.products);
 			setTotalPages(data.totalPages);
@@ -46,7 +49,13 @@ const AdminDashboard = () => {
 
 	const handleUpdateProduct = async (updatedProduct) => {
 		try {
-			await adminService.updateProduct(updatedProduct.id, updatedProduct);
+			console.log(editingProduct.id);
+
+			await productService.updateProduct(
+				editingProduct.id,
+				updatedProduct,
+				token
+			);
 			fetchProducts(currentPage); // Refresh product list
 			setEditingProduct(null); // Reset editing state
 		} catch (err) {
@@ -56,7 +65,7 @@ const AdminDashboard = () => {
 
 	const handleDeleteProduct = async (productId) => {
 		try {
-			await adminService.deleteProduct(productId,token);
+			await adminService.deleteProduct(productId, token);
 			fetchProducts(currentPage); // Refresh product list
 		} catch (err) {
 			setError("Failed to delete product. Please try again.");
@@ -77,6 +86,12 @@ const AdminDashboard = () => {
 			<header className="bg-blue-600 text-white py-4 px-6">
 				<div className="flex justify-between items-center">
 					<h1 className="text-2xl font-bold">Admin Dashboard</h1>
+					<button
+						onClick={() => navigate("/all-orders")}
+						className="bg-white text-blue-600 px-4 py-2 rounded shadow hover:bg-gray-200"
+					>
+						View All Orders
+					</button>
 				</div>
 			</header>
 
