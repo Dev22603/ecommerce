@@ -381,7 +381,7 @@ const updateProduct = async (req, res) => {
 				category_id,
 			} = req.body;
 			// Parse tags into an array if it's a JSON string
-			const parsedTags = typeof tags === String ? tags.split(",") : tags;
+			const parsedTags = tags.split(",");
 
 			const images = req.files
 				? req.files.map((file) => `/uploads/${file.filename}`)
@@ -392,6 +392,17 @@ const updateProduct = async (req, res) => {
 					.status(400)
 					.json({ message: "At least one image is required." });
 			}
+			console.log([
+				product_name,
+				ws_code,
+				sales_price,
+				mrp,
+				package_size,
+				images,
+				parsedTags,
+				category_id,
+				id,
+			]);
 
 			const result = await pool.query(
 				"UPDATE Products SET product_name = $1, ws_code = $2, sales_price = $3, mrp = $4, package_size = $5, images = $6, tags = $7, category_id = $8 WHERE id = $9 RETURNING *",
@@ -411,7 +422,10 @@ const updateProduct = async (req, res) => {
 			res.status(201).json(result.rows[0]);
 		} catch (err) {
 			console.error(err);
-			res.status(500).json({ message: "Error creating product" });
+			res.status(500).json({
+				message: "Error creating product",
+				error: err,
+			});
 		}
 	});
 };
