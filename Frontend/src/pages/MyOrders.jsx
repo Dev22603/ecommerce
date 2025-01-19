@@ -10,6 +10,8 @@ const MyOrders = () => {
 	const [page, setPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [searchQuery, setSearchQuery] = useState("");
+	const [startDate, setStartDate] = useState(""); // For the "before" date
+	const [endDate, setEndDate] = useState(""); // For the "after" date
 	const [isSearching, setIsSearching] = useState(false); // Track if we are in search mode
 
 	// Fetch orders
@@ -29,19 +31,20 @@ const MyOrders = () => {
 		}
 	};
 
-	// Handle search orders by order ID or date
+	// Handle search by date
 	const handleSearch = async (page = 1) => {
-		if (!searchQuery.trim()) {
+		if (!startDate && !endDate) {
 			setIsSearching(false);
-			fetchOrders(page); // Reset to default fetch if search is empty
+			fetchOrders(page); // Reset to default fetch if no date is selected
 			return;
 		}
 
 		try {
 			setIsSearching(true);
-			const result = await orderService.searchOrders(
+			const result = await orderService.searchOrdersByDate(
 				user.token,
-				searchQuery,
+				startDate,
+				endDate,
 				page
 			);
 			const { orders, totalPages } = result;
@@ -64,7 +67,7 @@ const MyOrders = () => {
 		} else {
 			toast.error("Please log in to view your orders.");
 		}
-	}, [user, page]);
+	}, [user, page, startDate, endDate]);
 
 	const handlePreviousPage = () => {
 		if (page > 1) setPage(page - 1);
@@ -80,12 +83,20 @@ const MyOrders = () => {
 
 			{/* Search Section */}
 			<div className="mb-6 flex items-center gap-4">
+				{/* Date range selection */}
 				<input
-					type="text"
-					placeholder="Search by Order ID or Date"
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-					className="border rounded-lg p-2 flex-grow"
+					type="month"
+					value={startDate}
+					onChange={(e) => setStartDate(e.target.value)}
+					className="border rounded-lg p-2"
+					placeholder="Start Date (Month/Year)"
+				/>
+				<input
+					type="month"
+					value={endDate}
+					onChange={(e) => setEndDate(e.target.value)}
+					className="border rounded-lg p-2"
+					placeholder="End Date (Month/Year)"
 				/>
 				<button
 					onClick={() => handleSearch(1)} // Reset to page 1 on new search
