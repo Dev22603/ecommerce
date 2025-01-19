@@ -1,3 +1,4 @@
+// Frontend\src\App.jsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
@@ -8,17 +9,35 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ToastContainer } from "react-toastify";
+import Cart from "./pages/Cart";
+import MyOrders from "./pages/MyOrders"; // Import the new page for my orders
 
 const App = () => (
-	<CartProvider>
-		<ToastContainer />
-		<AuthProvider>
+	<AuthProvider>
+		<CartProvider>
+			<ToastContainer />
 			<Router>
 				<Navbar />
 				<Routes>
 					<Route path="/" element={<Home />} />
 					<Route path="/signup" element={<Signup />} />
 					<Route path="/login" element={<Login />} />
+					<Route
+						path="/my-orders"
+						element={
+							<ProtectedRoute>
+								<MyOrders />
+							</ProtectedRoute>
+						}
+					/>
+					<Route
+						path="/cart"
+						element={
+							<ProtectedRoute>
+								<Cart />
+							</ProtectedRoute>
+						}
+					/>
 					<Route
 						path="/admin-dashboard"
 						element={
@@ -29,8 +48,8 @@ const App = () => (
 					/>
 				</Routes>
 			</Router>
-		</AuthProvider>
-	</CartProvider>
+		</CartProvider>
+	</AuthProvider>
 );
 
 export default App;

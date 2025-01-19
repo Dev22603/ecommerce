@@ -10,9 +10,10 @@ export const AuthProvider = ({ children }) => {
 	useEffect(() => {
 		const token = localStorage.getItem("authToken");
 		const role = localStorage.getItem("role");
+		const name = localStorage.getItem("name");
 
 		if (token && role) {
-			setUser({ token, role });
+			setUser({ token, role, name });
 		}
 	}, []);
 
@@ -21,9 +22,11 @@ export const AuthProvider = ({ children }) => {
 		if (user) {
 			localStorage.setItem("authToken", user.token);
 			localStorage.setItem("role", user.role);
+			localStorage.setItem("name", user.name);
 		} else {
 			localStorage.removeItem("authToken");
 			localStorage.removeItem("role");
+			localStorage.removeItem("name");
 		}
 	}, [user]);
 
@@ -35,6 +38,7 @@ export const AuthProvider = ({ children }) => {
 		setUser(null); // Clear user data from context
 		localStorage.removeItem("authToken"); // Remove the token
 		localStorage.removeItem("role"); // Remove the role
+		localStorage.removeItem("name"); // Remove the role
 	};
 
 	return (

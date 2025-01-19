@@ -42,6 +42,8 @@ const Login = () => {
 
 			// Call the API
 			const userData = await authService.login({ email, password });
+			console.log(userData);
+			
 
 			// Update global authentication state (set user data in AuthContext)
       
