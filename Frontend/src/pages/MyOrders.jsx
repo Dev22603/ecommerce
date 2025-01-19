@@ -9,10 +9,6 @@ const MyOrders = () => {
 	const [orders, setOrders] = useState([]);
 	const [page, setPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
-	const [searchQuery, setSearchQuery] = useState("");
-	const [startDate, setStartDate] = useState(""); // For the "before" date
-	const [endDate, setEndDate] = useState(""); // For the "after" date
-	const [isSearching, setIsSearching] = useState(false); // Track if we are in search mode
 
 	// Fetch orders
 	const fetchOrders = async (page = 1) => {
@@ -31,43 +27,13 @@ const MyOrders = () => {
 		}
 	};
 
-	// Handle search by date
-	const handleSearch = async (page = 1) => {
-		if (!startDate && !endDate) {
-			setIsSearching(false);
-			fetchOrders(page); // Reset to default fetch if no date is selected
-			return;
-		}
-
-		try {
-			setIsSearching(true);
-			const result = await orderService.searchOrdersByDate(
-				user.token,
-				startDate,
-				endDate,
-				page
-			);
-			const { orders, totalPages } = result;
-			setOrders(orders);
-			setTotalPages(totalPages);
-			setPage(page);
-		} catch (error) {
-			console.error("Search failed:", error);
-			toast.error("Search failed.");
-		}
-	};
-
 	useEffect(() => {
 		if (user) {
-			if (isSearching) {
-				handleSearch(page);
-			} else {
-				fetchOrders(page);
-			}
+			fetchOrders(page);
 		} else {
 			toast.error("Please log in to view your orders.");
 		}
-	}, [user, page, startDate, endDate]);
+	}, [user, page]);
 
 	const handlePreviousPage = () => {
 		if (page > 1) setPage(page - 1);
@@ -80,31 +46,6 @@ const MyOrders = () => {
 	return (
 		<div className="p-6">
 			<h1 className="text-2xl font-bold mb-6">My Orders</h1>
-
-			{/* Search Section */}
-			<div className="mb-6 flex items-center gap-4">
-				{/* Date range selection */}
-				<input
-					type="month"
-					value={startDate}
-					onChange={(e) => setStartDate(e.target.value)}
-					className="border rounded-lg p-2"
-					placeholder="Start Date (Month/Year)"
-				/>
-				<input
-					type="month"
-					value={endDate}
-					onChange={(e) => setEndDate(e.target.value)}
-					className="border rounded-lg p-2"
-					placeholder="End Date (Month/Year)"
-				/>
-				<button
-					onClick={() => handleSearch(1)} // Reset to page 1 on new search
-					className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-				>
-					Search
-				</button>
-			</div>
 
 			{/* Orders Table */}
 			{orders.length === 0 ? (
