@@ -50,8 +50,7 @@ import { pool } from "../db/db.mjs";
 // 	}
 // };
 
-
-// better signup        
+// better signup
 const signup = async (req, res) => {
 	const { name, email, password } = req.body;
 	console.log(req.body);
@@ -73,16 +72,20 @@ const signup = async (req, res) => {
 		}
 
 		// Determine the role based on email (case insensitive)
-		let role = lowerCaseEmail.endsWith('@medkart.in') ? 'admin' : 'customer';
+		let role = lowerCaseEmail.endsWith("@medkart.in")
+			? "admin"
+			: "customer";
 
 		// If role is 'admin', check if an admin already exists
-		if (role === 'admin') {
+		if (role === "admin") {
 			const adminExists = await pool.query(
 				"SELECT * FROM Users WHERE role = $1",
-				['admin']
+				["admin"]
 			);
 			if (adminExists.rows.length > 0) {
-				return res.status(400).json({ error: "An admin already exists" });
+				return res
+					.status(400)
+					.json({ error: "An admin already exists" });
 			}
 		}
 
@@ -106,9 +109,6 @@ const signup = async (req, res) => {
 		res.status(500).json({ error: "Error creating user" });
 	}
 };
-
-
-
 
 // Login controller
 const login = async (req, res) => {
@@ -134,7 +134,12 @@ const login = async (req, res) => {
 
 		// Create JWT token
 		const token = jwt.sign(
-			{ id: user.id, username: user.username, role: user.role },
+			{
+				id: user.id,
+				username: user.username,
+				role: user.role,
+				name: user.name,
+			},
 			process.env.JWT_SECRET,
 			{
 				expiresIn: "1h",
@@ -142,7 +147,11 @@ const login = async (req, res) => {
 		);
 		console.log("token");
 
-		res.status(200).json({ token: token, role: user.role });
+		res.status(200).json({
+			token: token,
+			role: user.role,
+			name: user.name,
+		});
 	} catch (err) {
 		res.status(500).json({ error: "Login failed" });
 	}

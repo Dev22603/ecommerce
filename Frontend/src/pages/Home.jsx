@@ -92,14 +92,14 @@ const Home = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.map((product) => {
-                    const cartItem = cartItems.find(
-                        (item) => item.id === product.id
-                    );
+                    // const cartItem = cartItems.find(
+                    //     (item) => item.id === product.id
+                    // );
                     return (
                         <ProductCard
                             key={product.id}
                             product={product}
-                            cartItem={cartItem}
+                            // cartItem={cartItem}
                         />
                     );
                 })}
