@@ -63,17 +63,8 @@ export const productService = {
 
     // Update an existing product (admin only)
     updateProduct: async (productId, productData, token) => {
-        const formData = new FormData();
-        for (const key in productData) {
-            if (key === "images") {
-                productData.images.forEach((image) => {
-                    formData.append("images", image);
-                });
-            } else {
-                formData.append(key, productData[key]);
-            }
-        }
-        const response = await axios.put(`${API_URL}/${productId}`, formData, {
+        
+        const response = await axios.put(`${API_URL}/${productId}`, productData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 "Content-Type": "multipart/form-data",
