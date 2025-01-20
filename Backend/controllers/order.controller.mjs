@@ -94,7 +94,7 @@ const getUserOrders = async (req, res) => {
 		// Query to fetch the user's paginated orders with order details
 		const result = await pool.query(
 			`SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
+                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
              FROM Orders o
              JOIN Order_Items oi ON o.id = oi.order_id
              JOIN Products p ON oi.product_id = p.id
@@ -119,7 +119,7 @@ const getUserOrders = async (req, res) => {
 					product_id: row.product_id,
 					product_name: row.product_name,
 					quantity: row.quantity,
-					sales_price: row.sales_price,
+					sales_price: parseFloat(row.product_price),
 				});
 			} else {
 				acc.push({
@@ -134,7 +134,7 @@ const getUserOrders = async (req, res) => {
 							product_id: row.product_id,
 							product_name: row.product_name,
 							quantity: row.quantity,
-							sales_price: row.sales_price,
+							sales_price: parseFloat(row.product_price),
 						},
 					],
 				});
@@ -164,7 +164,7 @@ const getOrderDetails = async (req, res) => {
 	try {
 		const orderDetails = await pool.query(
 			`SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
+                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
              FROM Orders o
              JOIN Order_Items oi ON o.id = oi.order_id
              JOIN Products p ON oi.product_id = p.id
