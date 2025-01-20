@@ -103,7 +103,7 @@ const Cart = () => {
 						>
 							<div className="flex items-center gap-4">
 								<img
-									src={item.images[0]}
+									src={`http://localhost:5000/api${item.images[0]}`}
 									alt={item.product_name}
 									className="w-16 h-16 object-cover rounded-lg"
 								/>
