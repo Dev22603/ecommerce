@@ -1,18 +1,16 @@
 // routes/cart.routes.mjs
-
-
 import express from "express";
 import {
-	addItemToCart,
-	checkCartItemQuantity,
-	clearCart,
-	decrementQuantity,
-	getCart,
-	getCartTotal,
-	getProductRecommendations,
-	incrementQuantity,
-	removeItemFromCart,
-	updateCart,
+    addItemToCart,
+    checkCartItemQuantity,
+    clearCart,
+    decrementQuantity,
+    getCart,
+    getCartTotal,
+    getProductRecommendations,
+    incrementQuantity,
+    removeItemFromCart,
+    updateCart,
 } from "../controllers/cart.controllers.mjs";
 import { authenticate } from "../middlewares/auth.mjs";
 

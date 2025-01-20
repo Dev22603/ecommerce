@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import ProductForm from "../components/ProductForm";
 import ProductTable from "../components/ProductTable";
-import { adminService } from "../services/adminService";
 import { AuthContext } from "../context/AuthContext";
 import { productService } from "../services/productService";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +27,7 @@ const AdminDashboard = () => {
 		try {
 			console.log("fetch", page);
 
-			const data = await adminService.getProducts(page, itemsPerPage);
+			const data = await productService.getProducts(page, itemsPerPage);
 			setProducts(data.products);
 			setTotalPages(data.totalPages);
 		} catch (err) {
@@ -40,7 +39,7 @@ const AdminDashboard = () => {
 		console.log(formData);
 
 		try {
-			await adminService.addProduct(formData, token);
+			await productService.addProduct(formData, token);
 			fetchProducts(currentPage); // Refresh product list
 		} catch (err) {
 			setError(`Failed to add product. Please try again.${err}`);
@@ -65,7 +64,7 @@ const AdminDashboard = () => {
 
 	const handleDeleteProduct = async (productId) => {
 		try {
-			await adminService.deleteProduct(productId, token);
+			await productService.deleteProduct(productId, token);
 			fetchProducts(currentPage); // Refresh product list
 		} catch (err) {
 			setError("Failed to delete product. Please try again.");

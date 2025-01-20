@@ -110,51 +110,6 @@ const createProduct = async (req, res) => {
     });
 };
 
-// const getProductsByName = async (req, res) => {
-//     const { product_name } = req.params;
-
-//     try {
-//         const result = await pool.query(
-//             "SELECT * FROM Products WHERE product_name ILIKE $1",
-//             [`%${product_name}%`]
-//         );
-//         const products = result.rows;
-
-//         if (products.length === 0) {
-//             return res
-//                 .status(404)
-//                 .json({ error: "No products found matching the name" });
-//         }
-
-//         res.status(200).json(products);
-//     } catch (err) {
-//         res.status(500).json({ error: "Error fetching products by name" });
-//         console.log(err);
-//     }
-// };
-// const getProductsByWsCode = async (req, res) => {
-//     const { ws_code } = req.params;
-
-//     try {
-//         const result = await pool.query(
-//             "SELECT * FROM Products WHERE CAST(ws_code AS TEXT) ILIKE $1",
-//             [`%${ws_code}%`]
-//         );
-//         const products = result.rows;
-
-//         if (products.length === 0) {
-//             return res
-//                 .status(404)
-//                 .json({ error: "No products found matching the ws_code" });
-//         }
-
-//         res.status(200).json(products);
-//     } catch (err) {
-//         res.status(500).json({ error: "Error fetching products by ws_code" });
-//         console.log(err);
-//     }
-// };
-
 const getProductsByName = async (req, res) => {
     const { product_name } = req.params;
     const page = parseInt(req.query.page) || 1;
@@ -332,45 +287,6 @@ const deleteProduct = async (req, res) => {
 };
 
 const updateProduct = async (req, res) => {
-    // const { id } = req.params;
-    // const {
-    //     product_name,
-    //     ws_code,
-    //     sales_price,
-    //     mrp,
-    //     package_size,
-    //     tags,
-    //     category_id,
-    // } = req.body;
-    // console.log(req.body);
-    // try {
-    // const result = await pool.query(
-    //     "UPDATE Products SET product_name = $1, ws_code = $2, sales_price = $3, mrp = $4, package_size = $5, images = $6, tags = $7, category_id = $8 WHERE id = $9 RETURNING *",
-    //     [
-    //         product_name,
-    //         ws_code,
-    //         sales_price,
-    //         mrp,
-    //         package_size,
-    //         images,
-    //         tags,
-    //         category_id,
-    //         id,
-    //     ]
-    // );
-
-    //     const product = result.rows[0];
-
-    //     if (!product) {
-    //         return res.status(404).json({ error: "Product not found" });
-    //     }
-
-    //     res.status(200).json(product);
-    // } catch (err) {
-    //     res.status(500).json({ error: "Error updating product" });
-    //     console.log(err);
-    // }
-
     const { id } = req.params;
     console.log(id);
 
@@ -405,11 +321,7 @@ const updateProduct = async (req, res) => {
                     .status(400)
                     .json({ message: "At least one image is required." });
             }
-            // if (images.length + existingImages.length === 0) {
-            //     return res
-            //         .status(400)
-            //         .json({ message: "At least one image is required." });
-            // }
+          
             console.log([
                 product_name,
                 ws_code,
