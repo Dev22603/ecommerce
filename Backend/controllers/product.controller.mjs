@@ -72,7 +72,7 @@ const createProduct = async (req, res) => {
             const parsedStock = parseInt(stock, 10);
 
             const parsedTags = tags.split(",").map((tag) => tag.trim());
-            console.log(parsedTags, "p");
+            console.log(parsedTags);
 
             const imageURLs = req.files
                 ? req.files.map((file) => `/uploads/${file.filename}`)
