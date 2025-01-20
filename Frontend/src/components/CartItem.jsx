@@ -6,7 +6,7 @@ const CartItem = ({ item, removeFromCart }) => {
     <div className="flex justify-between items-center p-4 border-b border-gray-200">
       <div className="flex items-center space-x-4">
         <img
-          src={item.image} // Assuming each product has an image
+          src={`http://localhost:5000/api${item.images[0]}`} // Assuming each product has an image
           alt={item.name}
           className="w-20 h-20 object-cover"
         />

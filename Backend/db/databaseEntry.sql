@@ -1,15 +1,15 @@
 INSERT INTO Categories (category_name)
 VALUES
-    ('Electronics'),
-    ('Clothing'),
-    ('Home Appliances'),
-    ('Books'),
-    ('Toys'),
-    ('Beauty & Personal Care'),
-    ('Sports & Outdoors'),
-    ('Furniture'),
-    ('Automotive'),
-    ('Food & Beverages');
+        ('Electronics'),
+        ('Clothing'),
+        ('Home Appliances'),
+        ('Books'),
+        ('Toys'),
+        ('Beauty & Personal Care'),
+        ('Sports & Outdoors'),
+        ('Furniture'),
+        ('Automotive'),
+        ('Food & Beverages');
 
 -- Inserting 5 products for 'Electronics' (category_id = 1)
 INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id, stock)
