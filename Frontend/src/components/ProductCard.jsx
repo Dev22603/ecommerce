@@ -106,11 +106,12 @@ const ProductCard = ({ product }) => {
 			setIsLoading(false);
 		}
 	};
+console.log(`http://localhost:5000/api${product.images[0]}`);
 
 	return (
 		<div className="border rounded-lg shadow-md p-4 flex flex-col items-center text-center">
 			<img
-				src={product.images[0]}
+				src={`http://localhost:5000/api${product.images[0]}`}
 				alt={product.product_name}
 				className="h-40 w-40 object-cover mb-4"
 			/>
