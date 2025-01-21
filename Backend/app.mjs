@@ -11,11 +11,11 @@ import path from "path";
 
 const app = express();
 app.use(
-	cors({
-		origin: "http://localhost:5173", // Allow this frontend origin
-		methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
-		credentials: true, // Allow credentials if needed
-	})
+    cors({
+        origin: "http://localhost:5173", // Allow this frontend origin
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true, // Allow credentials if needed
+    })
 );
 // Middleware
 app.use(bodyParser.json());
@@ -35,4 +35,3 @@ const uploadsDir = path.resolve("uploads"); // Resolve the absolute path
 app.use("/api/uploads", express.static(uploadsDir));
 
 export { app }; // Export the app for use in index.js
-// export default app;  // Export the app for use in index.js
