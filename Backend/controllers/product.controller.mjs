@@ -50,29 +50,14 @@ const createProduct = async (req, res) => {
         console.log(req.files);
 
         try {
-            const {
-                product_name,
-                ws_code,
-                sales_price,
-                mrp,
-                package_size,
-                tags, // Received as a string, e.g., '["astro","sports"]'
-                category_id,
-                stock,
-            } = req.body;
-            // Parse tags into an array if it's a JSON string
-            // const parsedTags = tags.split(",");
-
-            // Parse and validate ws_code, sales_price, mrp, package_size, and category_id
-            const parsedWsCode = parseInt(ws_code, 10);
-            const parsedSalesPrice = parseInt(sales_price, 10);
-            const parsedMrp = parseInt(mrp, 10);
-            const parsedPackageSize = parseInt(package_size, 10);
-            const parsedCategoryId = parseInt(category_id, 10);
-            const parsedStock = parseInt(stock, 10);
-
-            const parsedTags = tags.split(",").map((tag) => tag.trim());
-            console.log(parsedTags);
+            const product_name = req.body.product_name?.trim();
+            const ws_code = parseInt(req.body.ws_code?.trim(), 10); // Convert to integer after trimming
+            const sales_price = parseInt(req.body.sales_price?.trim(), 10); // Convert to integer after trimming
+            const mrp = parseInt(req.body.mrp?.trim(), 10); // Convert to integer after trimming
+            const package_size = parseInt(req.body.package_size?.trim(), 10); // Convert to integer after trimming
+            const tags = req.body.tags.split(",").map((tag) => tag.trim());
+            const category_id = parseInt(req.body.category_id?.trim(), 10); // Convert to integer after trimming
+            const stock = parseInt(req.body.stock?.trim(), 10); // Convert to integer after trimming
 
             const imageURLs = req.files
                 ? req.files.map((file) => `/uploads/${file.filename}`)
@@ -88,14 +73,14 @@ const createProduct = async (req, res) => {
                 "INSERT INTO Products (product_name, ws_code, sales_price, mrp, package_size, images, tags, category_id, stock) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *",
                 [
                     product_name,
-                    parsedWsCode,
-                    parsedSalesPrice,
-                    parsedMrp,
-                    parsedPackageSize,
+                    ws_code,
+                    sales_price,
+                    mrp,
+                    package_size,
                     imageURLs, // Array of image URLs
-                    parsedTags, // PostgreSQL expects an array
-                    parsedCategoryId,
-                    parsedStock,
+                    tags, // PostgreSQL expects an array
+                    category_id,
+                    stock,
                 ]
             );
 
@@ -105,6 +90,16 @@ const createProduct = async (req, res) => {
             });
         } catch (err) {
             console.error(err);
+
+            // Check for unique constraint violation on ws_code
+            if (err.code === "23505") {
+                return res.status(400).json({
+                    message:
+                        "Product code (ws_code) already exists. Please provide a unique ws_code.",
+                });
+            }
+
+            // Handle other errors
             res.status(500).json({ message: "Error creating product", err });
         }
     });
@@ -182,6 +177,45 @@ const getProductsByWsCode = async (req, res) => {
         });
     } catch (err) {
         res.status(500).json({ error: "Error fetching products by ws_code" });
+        console.error(err);
+    }
+};
+const getProductsByCategory = async (req, res) => {
+    const { category_id } = req.params;
+    console.log(category_id);
+    
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    try {
+        // Fetch products by ws_code with pagination
+        const result = await pool.query(
+            "SELECT * FROM Products WHERE category_id = $1 LIMIT $2 OFFSET $3",
+            [category_id, limit, offset]
+        );
+
+        const totalCountResult = await pool.query(
+            "SELECT COUNT(*) FROM Products WHERE category_id = $1",
+            [category_id]
+        );
+        const totalCount = parseInt(totalCountResult.rows[0].count, 10);
+
+        if (result.rows.length === 0) {
+            return res
+                .status(404)
+                .json({ error: "No products found matching the category" });
+        }
+
+        res.status(200).json({
+            products: result.rows,
+            totalCount,
+            page,
+            limit,
+            totalPages: Math.ceil(totalCount / limit),
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Error fetching products by category" });
         console.error(err);
     }
 };
@@ -321,7 +355,7 @@ const updateProduct = async (req, res) => {
                     .status(400)
                     .json({ message: "At least one image is required." });
             }
-          
+
             console.log([
                 product_name,
                 ws_code,
@@ -371,4 +405,5 @@ export {
     getProductsByName,
     getProductsByWsCode,
     getCategories,
+    getProductsByCategory
 };

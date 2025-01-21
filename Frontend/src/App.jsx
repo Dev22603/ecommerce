@@ -16,8 +16,8 @@ import MyOrders from "./pages/MyOrders"; // Import the new page for my orders
 
 const App = () => (
 	<AuthProvider>
-		<CartProvider>
 			<ToastContainer />
+		<CartProvider>
 			<Router>
 				<Navbar />
 				<Routes>
