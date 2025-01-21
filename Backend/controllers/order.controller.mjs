@@ -73,28 +73,6 @@ const createOrder = async (req, res) => {
     }
 };
 
-// // Get user's orders v1
-// const getUserOrders = async (req, res) => {
-//     const user_id = req.user.id; // assuming you have user info from JWT token
-
-//     try {
-//         const result = await pool.query(
-//             "SELECT * FROM Orders WHERE user_id = $1",
-//             [user_id]
-//         );
-
-//         // Convert total_amount from string to float
-//         const orders = result.rows.map((order) => ({
-//             ...order,
-//             total_amount: parseFloat(order.total_amount),
-//         }));
-
-//         res.status(200).json(orders);
-//     } catch (error) {
-//         res.status(500).json({ message: "Error fetching orders", error });
-//     }
-// };
-
 // Get user's orders v2 pagination
 const getUserOrders = async (req, res) => {
     const user_id = req.user.id; // Assuming the user info is provided by JWT token
@@ -116,7 +94,7 @@ const getUserOrders = async (req, res) => {
         // Query to fetch the user's paginated orders with order details
         const result = await pool.query(
             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
+                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
              FROM Orders o
              JOIN Order_Items oi ON o.id = oi.order_id
              JOIN Products p ON oi.product_id = p.id
@@ -141,7 +119,7 @@ const getUserOrders = async (req, res) => {
                     product_id: row.product_id,
                     product_name: row.product_name,
                     quantity: row.quantity,
-                    sales_price: row.sales_price,
+                    sales_price: parseFloat(row.product_price),
                 });
             } else {
                 acc.push({
@@ -156,7 +134,7 @@ const getUserOrders = async (req, res) => {
                             product_id: row.product_id,
                             product_name: row.product_name,
                             quantity: row.quantity,
-                            sales_price: row.sales_price,
+                            sales_price: parseFloat(row.product_price),
                         },
                     ],
                 });
@@ -180,54 +158,13 @@ const getUserOrders = async (req, res) => {
     }
 };
 
-// const getOrderDetails = async (req, res) => {
-//     const { order_id } = req.params;
-
-//     try {
-//         const orderDetails = await pool.query(
-//             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-//                     oi.product_id, oi.quantity, p.product_name, p.sales_price
-//              FROM Orders o
-//              JOIN Order_Items oi ON o.id = oi.order_id
-//              JOIN Products p ON oi.product_id = p.id
-//              WHERE o.id = $1`,
-//             [order_id]
-//         );
-
-//         if (orderDetails.rows.length === 0) {
-//             return res.status(404).json({ message: "Order not found" });
-//         }
-
-//         // Extract the general order details (same for all rows)
-//         const { order_id: id, user_id, total_amount, created_at } = orderDetails.rows[0];
-
-//         // Transform the data to group items under the order
-//         const response = {
-//             order_id: id,
-//             user_id,
-//             total_amount: parseFloat(total_amount),
-//             created_at,
-//             order_items: orderDetails.rows.map((item) => ({
-//                 product_id: item.product_id,
-//                 product_name: item.product_name,
-//                 quantity: item.quantity,
-//                 sales_price: item.sales_price,
-//             })),
-//         };
-
-//         res.status(200).json(response);
-//     } catch (error) {
-//         res.status(500).json({ message: "Error fetching order details", error });
-//     }
-// };
-
 const getOrderDetails = async (req, res) => {
     const { order_id } = req.params;
 
     try {
         const orderDetails = await pool.query(
             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
+                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
              FROM Orders o
              JOIN Order_Items oi ON o.id = oi.order_id
              JOIN Products p ON oi.product_id = p.id
@@ -260,7 +197,7 @@ const getOrderDetails = async (req, res) => {
                 product_id: item.product_id,
                 product_name: item.product_name,
                 quantity: item.quantity,
-                sales_price: item.sales_price,
+                sales_price: parseFloat(item.product_price),
             })),
         };
 
@@ -343,21 +280,6 @@ const updateOrderStatus = async (req, res) => {
     }
 };
 
-// // Get All Orders (Admin Only) v1
-// const getAllOrders = async (req, res) => {
-//     try {
-//         const result = await pool.query(
-//             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-//                     u.name AS user_name, o.status
-//              FROM Orders o
-//              JOIN Users u ON o.user_id = u.id`
-//         );
-//         res.status(200).json(result.rows);
-//     } catch (error) {
-//         res.status(500).json({ message: "Error fetching all orders", error });
-//     }
-// };
-
 // Get All Orders (Admin Only) v2
 const getAllOrders = async (req, res) => {
     let { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
@@ -382,7 +304,7 @@ const getAllOrders = async (req, res) => {
         const result = await pool.query(
             `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
                     u.name AS user_name, o.status,
-                    oi.product_id, oi.quantity, p.product_name, p.sales_price
+                    oi.product_id, oi.quantity, oi.price AS item_price, p.product_name
              FROM Orders o
              JOIN Users u ON o.user_id = u.id
              JOIN Order_Items oi ON o.id = oi.order_id
@@ -423,7 +345,7 @@ const getAllOrders = async (req, res) => {
                         product_id: row.product_id,
                         product_name: row.product_name,
                         quantity: row.quantity,
-                        sales_price: row.sales_price,
+                        sales_price: parseFloat(row.item_price),
                     });
                 } else {
                     // If the order does not exist, create a new order and add the item
@@ -439,7 +361,7 @@ const getAllOrders = async (req, res) => {
                                 product_id: row.product_id,
                                 product_name: row.product_name,
                                 quantity: row.quantity,
-                                sales_price: row.sales_price,
+                                sales_price: parseFloat(row.item_price),
                             },
                         ],
                     });
@@ -462,7 +384,7 @@ const getAllOrders = async (req, res) => {
                                     product_id: row.product_id,
                                     product_name: row.product_name,
                                     quantity: row.quantity,
-                                    sales_price: row.sales_price,
+                                    sales_price: parseFloat(row.item_price),
                                 },
                             ],
                         },
@@ -488,90 +410,6 @@ const getAllOrders = async (req, res) => {
     }
 };
 
-
-// const searchOrdersByDate = async (req, res) => {
-//     const user_id = req.user.id; // Assuming the user info is provided by JWT token
-//     const { startDate, endDate, page = 1, limit = 10 } = req.query;
-
-//     try {
-//         const validatedPage = Math.max(1, parseInt(page, 10) || 1);
-//         const validatedLimit = Math.max(1, parseInt(limit, 10) || 10);
-//         const offset = (validatedPage - 1) * validatedLimit;
-
-//         let query = `SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-//                      oi.product_id, oi.quantity, p.product_name, p.sales_price
-//                      FROM Orders o
-//                      JOIN Order_Items oi ON o.id = oi.order_id
-//                      JOIN Products p ON oi.product_id = p.id
-//                      WHERE o.user_id = $1`;
-
-//         const queryParams = [user_id];
-
-//         if (startDate) {
-//             query += ` AND o.created_at >= $${queryParams.length + 1}`;
-//             queryParams.push(`${startDate}-01`); // Start of the selected month
-//         }
-
-//         if (endDate) {
-//             query += ` AND o.created_at <= $${queryParams.length + 1}`;
-//             queryParams.push(`${endDate}-31`); // End of the selected month
-//         }
-
-//         query += ` ORDER BY o.created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
-//         queryParams.push(validatedLimit, offset);
-
-//         const result = await pool.query(query, queryParams);
-
-//         if (result.rows.length === 0) {
-//             return res.status(404).json({ message: "No orders found" });
-//         }
-
-//         const orders = result.rows.reduce((acc, row) => {
-//             const existingOrder = acc.find(
-//                 (order) => order.order_id === row.order_id
-//             );
-//             if (existingOrder) {
-//                 existingOrder.order_items.push({
-//                     product_id: row.product_id,
-//                     product_name: row.product_name,
-//                     quantity: row.quantity,
-//                     sales_price: row.sales_price,
-//                 });
-//             } else {
-//                 acc.push({
-//                     order_id: row.order_id,
-//                     user_id: row.user_id,
-//                     total_amount: parseFloat(row.total_amount),
-//                     created_at: new Date(row.created_at).toLocaleDateString("en-GB"),
-//                     order_items: [
-//                         {
-//                             product_id: row.product_id,
-//                             product_name: row.product_name,
-//                             quantity: row.quantity,
-//                             sales_price: row.sales_price,
-//                         },
-//                     ],
-//                 });
-//             }
-//             return acc;
-//         }, []);
-
-//         res.status(200).json({
-//             page: validatedPage,
-//             limit: validatedLimit,
-//             total_count: result.rowCount,
-//             total_pages: Math.ceil(result.rowCount / validatedLimit),
-//             orders: orders,
-//         });
-//     } catch (error) {
-//         console.error("Error fetching user orders:", error);
-//         res.status(500).json({
-//             message: "An error occurred while fetching user orders",
-//         });
-//     }
-// };
-
-
 export {
     createOrder,
     getUserOrders,
@@ -579,5 +417,4 @@ export {
     cancelOrder,
     updateOrderStatus,
     getAllOrders,
-    // searchOrdersByDate
 };
