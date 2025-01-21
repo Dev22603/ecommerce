@@ -5,7 +5,7 @@ const API_URL = "http://localhost:5000/api/products";
 
 export const productService = {
     // Get all products with pagination (accessible to everyone)
-    getProducts: async (page = 1, limit = 10) => {
+    getProducts: async (page = 1, limit = 12) => {
         try {
             const response = await axios.get(`${API_URL}/`, {
                 params: { page, limit }, // Send pagination parameters

@@ -5,31 +5,59 @@ import { pool } from "../db/db.mjs";
 
 // better signup
 const signup = async (req, res) => {
-    const { name, email, password } = req.body;
-    console.log(req.body);
+    // Trim and extract fields
+    const name = req.body.name?.trim();
+    const email = req.body.email?.trim();
+    const password = req.body.password?.trim();
 
-    // Convert email to lowercase
+    console.log({ name, email, password });
+
+    // Validate name
+    if (!name || name.length < 2 || name.length > 100) {
+        return res.status(400).json({
+            error: "Name must be between 2 and 100 characters long",
+        });
+    }
+
+    // Validate email
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+    if (!email || !emailRegex.test(email)) {
+        return res.status(400).json({
+            error: "Invalid email format",
+        });
+    }
+
+    // Validate password
+    const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+
+    if (!password || !passwordRegex.test(password)) {
+        return res.status(400).json({
+            error: "Password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character",
+        });
+    }
+
+    // Convert email to lowercase for consistent checks
     const lowerCaseEmail = email.toLowerCase();
 
     try {
-        // Check if a user with this email already exists (in lowercase)
+        // Check if a user with this email already exists
         const result = await pool.query(
             "SELECT * FROM Users WHERE email = $1",
             [lowerCaseEmail]
         );
         if (result.rows.length > 0) {
-            // If a user with this email exists, send a response
             return res
                 .status(400)
                 .json({ error: "User with this email already exists" });
         }
 
-        // Determine the role based on email (case insensitive)
+        // Determine the role based on email
         let role = lowerCaseEmail.endsWith("@medkart.in")
             ? "admin"
             : "customer";
 
-        // If role is 'admin', check if an admin already exists
+        // If role is 'admin', ensure only one admin can exist
         if (role === "admin") {
             const adminExists = await pool.query(
                 "SELECT * FROM Users WHERE role = $1",
@@ -44,7 +72,7 @@ const signup = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Insert the new user into the database with the automatically assigned role
+        // Insert the new user into the database
         const newUser = await pool.query(
             "INSERT INTO Users (name, email, password, role) VALUES ($1, $2, $3, $4) RETURNING id, name, email, role",
             [name, lowerCaseEmail, hashedPassword, role]
@@ -65,7 +93,8 @@ const signup = async (req, res) => {
 
 // Login controller
 const login = async (req, res) => {
-    const { email, password } = req.body;
+    const email = req.body.email?.trim().toLowerCase();
+    const password = req.body.password?.trim();
 
     try {
         const result = await pool.query(
@@ -89,13 +118,12 @@ const login = async (req, res) => {
         const token = jwt.sign(
             {
                 id: user.id,
-                username: user.username,
                 role: user.role,
                 name: user.name,
             },
             process.env.JWT_SECRET,
             {
-                expiresIn: "1h",
+                expiresIn: "3h",
             }
         );
         console.log("token");
