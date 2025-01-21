@@ -16,7 +16,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "// {\r\n//     \"name\": \"Dev Bachani\",\r\n//     \"email\": \"dev.b@medkart.in\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Aarav Patel\",\r\n//     \"email\": \"aarav.patel@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Isha Gupta\",\r\n//     \"email\": \"isha.gupta@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Rohan Verma\",\r\n//     \"email\": \"rohan.verma@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Sneha Iyer\",\r\n//     \"email\": \"sneha.iyer@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Vikram Yadav\",\r\n//     \"email\": \"vikram.yadav@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Priya Singh\",\r\n//     \"email\": \"priya.singh@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Ankit Kumar\",\r\n//     \"email\": \"ankit.kumar@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Madhuri Reddy\",\r\n//     \"email\": \"madhuri.reddy@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }\r\n// {\r\n//     \"name\": \"Rahul Mehta\",\r\n//     \"email\": \"rahul.mehta@gmail.com\",\r\n//     \"password\": \"Abc@123\"\r\n// }",
+							"raw": "// {\r\n//     \"name\": \"Dev Sharma\",\r\n//     \"email\": \"dev@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"admin\"  \r\n// }\r\n// {\r\n//     \"name\": \"Aarav Patel\",\r\n//     \"email\": \"aarav.patel@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Isha Gupta\",\r\n//     \"email\": \"isha.gupta@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Rohan Verma\",\r\n//     \"email\": \"rohan.verma@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Sneha Iyer\",\r\n//     \"email\": \"sneha.iyer@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Vikram Yadav\",\r\n//     \"email\": \"vikram.yadav@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Priya Singh\",\r\n//     \"email\": \"priya.singh@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Ankit Kumar\",\r\n//     \"email\": \"ankit.kumar@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Madhuri Reddy\",\r\n//     \"email\": \"madhuri.reddy@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n// {\r\n//     \"name\": \"Rahul Mehta\",\r\n//     \"email\": \"rahul.mehta@gmail.com\",\r\n//     \"password\": \"Abc@123\",\r\n//     \"role\": \"customer\"\r\n// }\r\n{\r\n    \"name\": \"Om\",\r\n    \"email\": \"omsheth@gmail.com\",\r\n    \"password\": \"Abcd@123\",\r\n    \"role\": \"CUstomer\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -68,7 +68,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"email\":\"dev.b@medkart.in\",\r\n    \"password\":\"Abc@123\"\r\n}\r\n// {\r\n//     \"email\":\"kajal.lochab@gmail.com\",\r\n//     \"password\":\"Abc@123\"\r\n// }",
+							"raw": "// {\r\n//     \"email\":\"dev.b@medkart.in\",\r\n//     \"password\":\"Abc@123\"\r\n// }\r\n// {\r\n//     \"email\":\"kajal.lochab@gmail.com\",\r\n//     \"password\":\"Abc@123\"\r\n// }\r\n{\r\n    \"email\": \"aarav.patel@gmail.com\",\r\n    \"password\": \"Abc@123\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -117,6 +117,83 @@
 		{
 			"name": "Products",
 			"item": [
+				{
+					"name": "3. Create Product",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AuthToken}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "images",
+									"type": "file",
+									"src": [
+										"postman-cloud:///1efd4c2b-e889-4220-843d-4c17b536e7b9",
+										"postman-cloud:///1efd4c67-ad5f-44b0-9b5d-41268d9e98ed"
+									]
+								},
+								{
+									"key": "product_name",
+									"value": "R6 Mark ii",
+									"type": "text"
+								},
+								{
+									"key": "ws_code",
+									"value": "1233",
+									"type": "text"
+								},
+								{
+									"key": "sales_price",
+									"value": "200000",
+									"type": "text"
+								},
+								{
+									"key": "mrp",
+									"value": "225000",
+									"type": "text"
+								},
+								{
+									"key": "package_size",
+									"value": "1",
+									"type": "text"
+								},
+								{
+									"key": "tags",
+									"value": "camera,wildlife,full frame",
+									"type": "text"
+								},
+								{
+									"key": "category_id",
+									"value": "1",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/products",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "4. Create Category",
 					"request": {
@@ -186,8 +263,9 @@
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzQzNjA3LCJleHAiOjE3MzY3NDcyMDd9.7sgTg3gCiQzWGrqptBeZAKeCBXXLfIZ3fSUwZk23fN8",
-								"type": "text"
+								"value": "Bearer {{AuthToken}}",
+								"type": "text",
+								"disabled": true
 							}
 						],
 						"url": {
@@ -229,37 +307,7 @@
 					"response": []
 				},
 				{
-					"name": "8. Update Product old",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n  \"product_name\": \"Sample Product\",\r\n  \"ws_code\": 12345,\r\n  \"sales_price\": 100,\r\n  \"mrp\": 150,\r\n  \"package_size\": 500,\r\n  \"images\": [\r\n    \"http://example.com/sample-product-image1.jpg\",\r\n    \"http://example.com/sample-product-image2.jpg\",\r\n    \"http://example.com/sample-product-image3.jpg\"\r\n  ],\r\n  \"tags\": [\r\n    \"sample\",\r\n    \"product\",\r\n    \"new\",\r\n    \"featured\"\r\n  ],\r\n  \"category_id\": 2\r\n}\r\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "http://localhost:5000/api/products/3",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"api",
-								"products",
-								"3"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "10. Get Product by Product name Copy",
+					"name": "10. Get Product by Product name",
 					"request": {
 						"method": "GET",
 						"header": [
@@ -287,6 +335,45 @@
 					"response": []
 				},
 				{
+					"name": "10. Get Product by Product name with Pagination",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzQzNjA3LCJleHAiOjE3MzY3NDcyMDd9.7sgTg3gCiQzWGrqptBeZAKeCBXXLfIZ3fSUwZk23fN8",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/products/ws_code/5/?page=2&limit=12",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"ws_code",
+								"5",
+								""
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								},
+								{
+									"key": "limit",
+									"value": "12"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "11. Get Product by WS Code",
 					"request": {
 						"method": "GET",
@@ -303,6 +390,34 @@
 								"products",
 								"ws_code",
 								"12345"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "11. Get Product by Category",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:5000/api/products/category_id/1?page=1",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"products",
+								"category_id",
+								"1"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								}
 							]
 						}
 					},
@@ -342,20 +457,13 @@
 					},
 					"request": {
 						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzY4NDI3LCJleHAiOjE3MzY3NzIwMjd9.cQDQ2g4sd39KX9_1NQnE6UsaI5Pmr6laWukINO7jZAo",
-									"type": "string"
-								}
-							]
+							"type": "noauth"
 						},
 						"method": "PUT",
 						"header": [
 							{
 								"key": "Authorization",
-								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6NCwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzM2NzU4MjQ4LCJleHAiOjE3MzY3NjE4NDh9.5vt9x9Q_Yo0yXAtqN3D4-zRcbPFBaEYlRD5-nfdJA-w",
+								"value": "Bearer {{AuthToken}}",
 								"type": "text"
 							}
 						],
@@ -421,84 +529,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "3. Create Product",
-					"protocolProfileBehavior": {
-						"disabledSystemHeaders": {}
-					},
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{AuthToken}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "images",
-									"type": "file",
-									"src": [
-										"postman-cloud:///1efd4c2b-e889-4220-843d-4c17b536e7b9",
-										"postman-cloud:///1efd4c67-ad5f-44b0-9b5d-41268d9e98ed"
-									]
-								},
-								{
-									"key": "product_name",
-									"value": "R6 Mark ii",
-									"type": "text"
-								},
-								{
-									"key": "ws_code",
-									"value": "123",
-									"type": "text"
-								},
-								{
-									"key": "sales_price",
-									"value": "200000",
-									"type": "text"
-								},
-								{
-									"key": "mrp",
-									"value": "225000",
-									"type": "text"
-								},
-								{
-									"key": "package_size",
-									"value": "1",
-									"type": "text"
-								},
-								{
-									"key": "tags",
-									"value": "camera,wildlife,full frame",
-									"type": "text"
-								},
-								{
-									"key": "category_id",
-									"value": "1",
-									"type": "text"
-								}
-							]
-						},
-						"url": {
-							"raw": "http://localhost:5000/api/products/",
-							"protocol": "http",
-							"host": [
-								"localhost"
-							],
-							"port": "5000",
-							"path": [
-								"api",
-								"products",
-								""
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -518,7 +548,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"product_id\": 8\r\n}",
+							"raw": "{\r\n    \"product_id\": 69\r\n\r\n\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -604,7 +634,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/cart?page=1&limit=3",
+							"raw": "http://localhost:5000/api/cart",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -613,16 +643,6 @@
 							"path": [
 								"api",
 								"cart"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "3"
-								}
 							]
 						}
 					},
@@ -847,6 +867,33 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Cart Recommendations",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{AuthToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:5000/api/cart/recommendations",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"cart",
+								"recommendations"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -892,7 +939,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:5000/api/orders/?page=&limit=5",
+							"raw": "http://localhost:5000/api/orders/?page=5&limit=5",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -906,7 +953,7 @@
 							"query": [
 								{
 									"key": "page",
-									"value": ""
+									"value": "5"
 								},
 								{
 									"key": "limit",
@@ -929,7 +976,7 @@
 							}
 						],
 						"url": {
-							"raw": "http://localhost:5000/api/orders/8",
+							"raw": "http://localhost:5000/api/orders/1",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -938,7 +985,7 @@
 							"path": [
 								"api",
 								"orders",
-								"8"
+								"1"
 							]
 						}
 					},
@@ -1072,7 +1119,7 @@
 							}
 						},
 						"url": {
-							"raw": "http://localhost:5000/api/orders/admin/all",
+							"raw": "http://localhost:5000/api/orders/admin/all?page=2",
 							"protocol": "http",
 							"host": [
 								"localhost"
@@ -1083,6 +1130,12 @@
 								"orders",
 								"admin",
 								"all"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								}
 							]
 						}
 					},
