@@ -1,0 +1,6 @@
+npx sequelize-cli migration:generate --name create-users
+npx sequelize-cli migration:generate --name create-categories
+npx sequelize-cli migration:generate --name create-products
+npx sequelize-cli migration:generate --name create-carts
+npx sequelize-cli migration:generate --name create-orders
+npx sequelize-cli migration:generate --name create-order-items
