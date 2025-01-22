@@ -10,9 +10,9 @@ const createOrder = async (req, res) => {
         // Calculate total amount from the cart
         const totalAmountResult = await pool.query(
             `SELECT COALESCE(SUM(p.sales_price * c.quantity), 0) AS total_amount
-         FROM Carts c
-         JOIN Products p ON c.product_id = p.id
-         WHERE c.user_id = $1`,
+             FROM Carts c
+             JOIN Products p ON c.product_id = p.id
+             WHERE c.user_id = $1`,
             [user_id]
         );
 
