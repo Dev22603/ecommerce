@@ -1,7 +1,7 @@
 // controllers/user.controllers.js
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { User } from "../models/user.mjs"; // Import User model from Sequelize
+import { User } from "../db/db.mjs"; // Import User model from Sequelize
 
 // Signup function
 const signup = async (req, res) => {
