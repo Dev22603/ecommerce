@@ -30,7 +30,7 @@ const db = async () => {
         await sequelize.authenticate();
         console.log("Database connected");
 
-        await sequelize.sync();
+        // await sequelize.sync();
     } catch (error) {
         console.log("Connection failed", error);
     }

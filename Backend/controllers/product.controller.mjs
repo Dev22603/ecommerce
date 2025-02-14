@@ -1,7 +1,7 @@
 import multer from "multer";
 import path from "path";
 import { Product, Category } from "../db/db.mjs";
-import { Op } from 'sequelize';
+import { Op } from "sequelize";
 // Configure storage for multer
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -198,18 +198,18 @@ const getProductsByName = async (req, res) => {
             totalPages: Math.ceil(result.count / limit),
         });
     } catch (err) {
-        
         res.status(500).json({ error: "Error fetching products by name" });
     }
 };
 
 // Get products by ws_code
 const getProductsByWsCode = async (req, res) => {
-    const { ws_code } = req.params;
+    const ws_code = parseInt(req.params.ws_code);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
-    
+
+    console.log("ws_code", ws_code);
     try {
         const result = await Product.findAndCountAll({
             where: {
@@ -217,11 +217,11 @@ const getProductsByWsCode = async (req, res) => {
                     [Op.col]: `CAST(Product.ws_code AS text)`,
                     [Op.like]: `%${ws_code}%`,
                 },
-            }, 
+            },
             limit,
             offset,
         });
-        
+
         res.status(200).json({
             products: result.rows,
             totalCount: result.count,
