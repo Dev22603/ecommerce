@@ -1,4 +1,4 @@
-import db from "../db/index.js";
+import { pool } from "../db/db.mjs";
 import {
 	INSERT_ADDRESS,
 	GET_ALL_ADDRESSES_BY_USER,
@@ -6,12 +6,13 @@ import {
 	CHECK_ADDRESS_USED_IN_ORDERS,
 	SOFT_DELETE_ADDRESS,
 	HARD_DELETE_ADDRESS,
+	SET_DEFAULT_ADDRESS,
 } from "../queries/address.queries.mjs";
 import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
 import { addressSchema } from "../utils/validators/address.validator.mjs";
 
 // CREATE - Add new address
-export const createAddress = async (req, res) => {
+const createAddress = async (req, res) => {
 	try {
 		const {
 			full_name,
@@ -26,6 +27,18 @@ export const createAddress = async (req, res) => {
 		} = req.body;
 		const user_id = req.user.id; // assuming you have user info from JWT token
 
+		const parsedBody = {
+			full_name: full_name?.trim(),
+			phone: phone?.trim(),
+			pincode: pincode?.trim(),
+			house_number: house_number?.trim(),
+			area: area?.trim(),
+			landmark: landmark?.trim(),
+			city: city?.trim(),
+			state: state?.trim(),
+			address_type: address_type?.trim() || "Home",
+		};
+
 		const { error } = addressSchema.validate(parsedBody, {
 			abortEarly: false,
 		});
@@ -36,7 +49,7 @@ export const createAddress = async (req, res) => {
 				.json({ message: "Validation failed", errors });
 		}
 
-		const { rows } = await db.query(INSERT_ADDRESS, [
+		const { rows } = await pool.query(INSERT_ADDRESS, [
 			user_id,
 			full_name,
 			phone,
@@ -60,10 +73,10 @@ export const createAddress = async (req, res) => {
 };
 
 // READ - Get all addresses for a user
-export const getAddressesByUser = async (req, res) => {
+const getAddressesByUser = async (req, res) => {
 	try {
 		const userId = req.user.id;
-		const { rows } = await db.query(GET_ALL_ADDRESSES_BY_USER, [userId]);
+		const { rows } = await pool.query(GET_ALL_ADDRESSES_BY_USER, [userId]);
 
 		res.status(200).json({ success: true, addresses: rows });
 	} catch (err) {
@@ -76,7 +89,7 @@ export const getAddressesByUser = async (req, res) => {
 };
 
 // UPDATE - Update an address by ID
-export const updateAddress = async (req, res) => {
+const updateAddress = async (req, res) => {
 	try {
 		const addressId = req.params.id;
 		const {
@@ -91,7 +104,7 @@ export const updateAddress = async (req, res) => {
 			address_type,
 		} = req.body;
 
-		const { rows } = await db.query(UPDATE_ADDRESS, [
+		const { rows } = await pool.query(UPDATE_ADDRESS, [
 			addressId,
 			full_name,
 			phone,
@@ -122,24 +135,39 @@ export const updateAddress = async (req, res) => {
 };
 
 // DELETE - Smart delete (soft if used, hard if not)
-export const deleteAddress = async (req, res) => {
+const deleteAddress = async (req, res) => {
 	try {
 		const addressId = req.params.id;
+		const userId = req.user.id;
 
+		// Optional: Check if the address belongs to the user
+		const { rows: userAddresses } = await pool.query(
+			GET_ALL_ADDRESSES_BY_USER,
+			[userId]
+		);
+		const validAddress = userAddresses.find(
+			(addr) => addr.id === parseInt(addressId)
+		);
+		if (!validAddress) {
+			return res.status(404).json({
+				success: false,
+				error: "Address not found for this user",
+			});
+		}
 		// Check if address is used in orders
-		const { rows } = await db.query(CHECK_ADDRESS_USED_IN_ORDERS, [
+		const { rows } = await pool.query(CHECK_ADDRESS_USED_IN_ORDERS, [
 			addressId,
 		]);
 		const isUsed = rows[0].exists;
 
 		if (isUsed) {
-			await db.query(SOFT_DELETE_ADDRESS, [addressId]);
+			await pool.query(SOFT_DELETE_ADDRESS, [addressId]);
 			return res.status(200).json({
 				success: true,
 				message: "Address soft deleted (in use)",
 			});
 		} else {
-			await db.query(HARD_DELETE_ADDRESS, [addressId]);
+			await pool.query(HARD_DELETE_ADDRESS, [addressId]);
 			return res.status(200).json({
 				success: true,
 				message: "Address permanently deleted",
@@ -152,4 +180,44 @@ export const deleteAddress = async (req, res) => {
 			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
+};
+
+const setDefaultAddress = async (req, res) => {
+	try {
+		const userId = req.user.id;
+		const addressId = req.params.id;
+
+		// Optional: Check if the address belongs to the user
+		const { rows } = await pool.query(GET_ALL_ADDRESSES_BY_USER, [userId]);
+		const validAddress = rows.find(
+			(addr) => addr.id === parseInt(addressId)
+		);
+		if (!validAddress) {
+			return res.status(404).json({
+				success: false,
+				error: "Address not found for this user",
+			});
+		}
+
+		await pool.query(SET_DEFAULT_ADDRESS, [userId, addressId]);
+
+		return res.status(200).json({
+			success: true,
+			message: "Default address updated successfully",
+		});
+	} catch (err) {
+		console.error("Error setting default address:", err);
+		res.status(500).json({
+			success: false,
+			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+		});
+	}
+};
+
+export {
+	getAddressesByUser,
+	createAddress,
+	updateAddress,
+	deleteAddress,
+	setDefaultAddress,
 };

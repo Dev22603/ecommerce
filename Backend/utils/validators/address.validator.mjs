@@ -54,7 +54,6 @@ const addressSchema = Joi.object({
 
 	address_type: Joi.string().trim().required().messages({
 		"string.empty": ADDRESS_VALIDATION_ERRORS.ADDRESS_TYPE_REQUIRED,
-		"any.required": ADDRESS_VALIDATION_ERRORS.ADDRESS_TYPE_REQUIRED,
 	}),
 });
 

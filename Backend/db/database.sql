@@ -62,6 +62,7 @@ CREATE TABLE Addresses (
     state VARCHAR(100) NOT NULL,
     address_type VARCHAR(20)  DEFAULT 'Home',
     is_deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag
+    is_default BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
