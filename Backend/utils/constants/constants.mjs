@@ -27,6 +27,28 @@ const PRODUCT_FEEDBACK_MESSAGES = {
 	PRODUCT_ADDED_SUCCESS: "Product added successfully",
 };
 
+
+ const ADDRESS_VALIDATION_ERRORS = {
+	USER_ID_REQUIRED: "User ID is required.",
+	USER_ID_INVALID: "User ID must be a valid number.",
+	USER_ID_MIN: "User ID must be at least 1.",
+
+	FULL_NAME_REQUIRED: "Full name is required.",
+	FULL_NAME_MIN: "Full name must be at least 2 characters.",
+
+	PHONE_REQUIRED: "Phone number is required.",
+	PHONE_INVALID: "Phone number must be 10 digits.",
+
+	PINCODE_REQUIRED: "Pincode is required.",
+	PINCODE_INVALID: "Pincode must be a valid 6-digit code.",
+
+	HOUSE_NUMBER_REQUIRED: "House number is required.",
+	AREA_REQUIRED: "Area is required.",
+	CITY_REQUIRED: "City is required.",
+	STATE_REQUIRED: "State is required.",
+};
+
+
 const GLOBAL_ERROR_MESSAGES = {
 	SERVER_ERROR: "Internal Server Error. Please try again later.",
 };
@@ -35,4 +57,5 @@ export {
 	PRODUCT_VALIDATION_ERRORS,
 	PRODUCT_FEEDBACK_MESSAGES,
 	GLOBAL_ERROR_MESSAGES,
+	ADDRESS_VALIDATION_ERRORS
 };

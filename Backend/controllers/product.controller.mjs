@@ -9,7 +9,7 @@ import {
 	GLOBAL_ERROR_MESSAGES,
 	PRODUCT_FEEDBACK_MESSAGES,
 	PRODUCT_VALIDATION_ERRORS,
-} from "../utils/constants/product.constants.mjs";
+} from "../utils/constants/constants.mjs";
 import { productSchema } from "../utils/validators/product.validator.mjs";
 
 const createProduct = async (req, res) => {

@@ -46,13 +46,36 @@ CREATE TABLE Carts (
 
 CREATE TYPE order_status AS ENUM ('Pending', 'Shipped', 'Cancelled');
 
+
+
+-- Table to store multiple addresses for each user
+CREATE TABLE Addresses (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15)  NOT NULL CHECK (phone ~ '^\d{10}$'),
+    pincode VARCHAR(6) NOT NULL CHECK (pincode ~ '^\d{6}$'),
+    house_number VARCHAR(100) NOT NULL,
+    area VARCHAR(255) NOT NULL,
+    landmark VARCHAR(255),
+    city VARCHAR(100) NOT NULL,
+    state VARCHAR(100) NOT NULL,
+    address_type VARCHAR(20)  DEFAULT 'Home',
+    is_deleted BOOLEAN DEFAULT FALSE, -- Soft delete flag
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+
 CREATE TABLE Orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
+    address_id INTEGER REFERENCES Addresses(id) ON DELETE SET NULL, -- Link to user's selected address
     status order_status DEFAULT 'Pending',
     total_amount DECIMAL(10, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 
 CREATE TABLE Order_Items (
