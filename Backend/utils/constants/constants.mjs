@@ -46,6 +46,7 @@ const PRODUCT_FEEDBACK_MESSAGES = {
 	AREA_REQUIRED: "Area is required.",
 	CITY_REQUIRED: "City is required.",
 	STATE_REQUIRED: "State is required.",
+	ADDRESS_TYPE_REQUIRED: "Address Type cant be an empty string.",
 };
 
 

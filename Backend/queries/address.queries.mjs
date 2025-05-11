@@ -48,6 +48,14 @@ const HARD_DELETE_ADDRESS = `
   DELETE FROM Addresses
   WHERE id = $1;
 `;
+const SET_DEFAULT_ADDRESS = `
+  UPDATE Addresses
+  SET is_default = CASE
+    WHEN id = $2 THEN TRUE
+    ELSE FALSE
+  END
+  WHERE user_id = $1;
+`;
 
 export {
   INSERT_ADDRESS,
@@ -56,4 +64,5 @@ export {
   CHECK_ADDRESS_USED_IN_ORDERS,
   SOFT_DELETE_ADDRESS,
   HARD_DELETE_ADDRESS,
+  SET_DEFAULT_ADDRESS
 };
