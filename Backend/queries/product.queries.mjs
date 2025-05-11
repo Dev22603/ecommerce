@@ -1,22 +1,36 @@
 // /queries/product.queries.js
-export const INSERT_PRODUCT = `
+const INSERT_PRODUCT = `
   INSERT INTO Products (
     product_name,
-    ws_code,
     sales_price,
     mrp,
-    package_size,
     images,
-    tags,
     category_id,
     stock
   )
-  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+  VALUES ($1, $2, $3, $4, $5, $6)
   RETURNING *;
 `;
 
-export const CHECK_CATEGORY_EXISTS = `
+const CHECK_CATEGORY_EXISTS = `
   SELECT EXISTS (
   SELECT 1 FROM Categories WHERE id = $1
   );
 `;
+
+const SEARCH_PRODUCTS_BY_NAME = `
+  SELECT * FROM Products
+  WHERE product_name ILIKE $1
+  LIMIT $2 OFFSET $3;
+`;
+
+const COUNT_PRODUCTS_BY_NAME = `
+  SELECT COUNT(*) FROM Products
+  WHERE product_name ILIKE $1;
+`;
+export {
+	CHECK_CATEGORY_EXISTS,
+	INSERT_PRODUCT,
+	COUNT_PRODUCTS_BY_NAME,
+	SEARCH_PRODUCTS_BY_NAME,
+};
