@@ -1,5 +1,6 @@
 // Backend\controllers\cart.controllers.mjs
 import { pool } from "../db/db.mjs";
+import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
 
 // Add to Cart inspired by Amazon
 const addItemToCart = async (req, res) => {
@@ -8,58 +9,11 @@ const addItemToCart = async (req, res) => {
     console.log(user_id);
 
     try {
-        // Check if the product already exists in the user's cart
-        const existingItemResult = await pool.query(
-            "SELECT id, quantity FROM Carts WHERE user_id = $1 AND product_id = $2",
-            [user_id, product_id]
-        );
-
-        if (existingItemResult.rows.length > 0) {
-            // If product already exists, update the quantity (increment by 1)
-            const cartItem = existingItemResult.rows[0];
-            const updatedQuantity = cartItem.quantity + 1;
-
-            const updateResult = await pool.query(
-                "UPDATE Carts SET quantity = $1 WHERE id = $2 RETURNING id, product_id, quantity",
-                [updatedQuantity, cartItem.id]
-            );
-
-            // Fetch the product name
-            const productResult = await pool.query(
-                "SELECT product_name FROM Products WHERE id = $1",
-                [product_id]
-            );
-
-            // Return the updated cart item with product name
-            res.status(200).json({
-                id: updateResult.rows[0].id,
-                product_id: updateResult.rows[0].product_id,
-                quantity: updateResult.rows[0].quantity,
-                product_name: productResult.rows[0].product_name,
-            });
-        } else {
-            // If product doesn't exist in the cart, insert as a new item with quantity = 1
-            const insertResult = await pool.query(
-                "INSERT INTO Carts (user_id, product_id, quantity) VALUES ($1, $2, 1) RETURNING id, product_id, quantity",
-                [user_id, product_id]
-            );
-
-            // Fetch the product name
-            const productResult = await pool.query(
-                "SELECT product_name FROM Products WHERE id = $1",
-                [product_id]
-            );
-
-            // Return the newly added cart item with product name
-            res.status(201).json({
-                id: insertResult.rows[0].id,
-                product_id: insertResult.rows[0].product_id,
-                quantity: insertResult.rows[0].quantity,
-                product_name: productResult.rows[0].product_name,
-            });
-        }
+        const result=await pool.query(`
+            INSERT into Carts (user_id, product_id, quantity) VALUES ($1, $2, 1) 
+            `)
     } catch (error) {
-        res.status(500).json({ message: "Error adding item to cart", error });
+        res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
     }
 };
 
