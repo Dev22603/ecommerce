@@ -1,7 +1,7 @@
 // Backend\controllers\cart.controllers.mjs
 import { pool } from "../db/db.mjs";
 
-// Add to Cart insppired by Amazon
+// Add to Cart inspired by Amazon
 const addItemToCart = async (req, res) => {
     const { product_id } = req.body; // Only product_id is provided in the request
     const user_id = req.user.id;
