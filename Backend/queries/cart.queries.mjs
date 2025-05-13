@@ -19,10 +19,11 @@ export const GET_PRODUCT_NAME = `
   WHERE id = $1;
 `;
 
-export const INSERT_CART_ITEM = `
+export const ADD_TO_CART = `
   INSERT INTO Carts (user_id, product_id, quantity)
   VALUES ($1, $2, 1)
-  RETURNING id, product_id, quantity;
+  ON CONFLICT (user_id, product_id)
+  DO UPDATE SET quantity = Carts.quantity + 1;
 `;
 
 export const GET_CART_ITEMS_BY_USER = `

@@ -9,11 +9,17 @@ const addItemToCart = async (req, res) => {
     console.log(user_id);
 
     try {
-        const result=await pool.query(`
-            INSERT into Carts (user_id, product_id, quantity) VALUES ($1, $2, 1) 
-            `)
+        const result = await pool.query(`
+            INSERT INTO Carts (user_id, product_id, quantity)
+            VALUES ($1, $2, 1)
+            ON CONFLICT (user_id, product_id)
+            DO UPDATE SET quantity = Carts.quantity + 1;
+            `);
     } catch (error) {
-        res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
+        res.status(500).json({
+            message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+            error,
+        });
     }
 };
 
