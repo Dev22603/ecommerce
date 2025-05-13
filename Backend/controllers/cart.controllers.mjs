@@ -1,5 +1,10 @@
 // Backend\controllers\cart.controllers.mjs
 import { pool } from "../db/db.mjs";
+import {
+    ADD_TO_CART,
+    GET_CART_TOTAL_BY_USER,
+    GET_USER_CART,
+} from "../queries/cart.queries.mjs";
 import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
 
 // Add to Cart inspired by Amazon
@@ -9,12 +14,7 @@ const addItemToCart = async (req, res) => {
     console.log(user_id);
 
     try {
-        const result = await pool.query(`
-            INSERT INTO Carts (user_id, product_id, quantity)
-            VALUES ($1, $2, 1)
-            ON CONFLICT (user_id, product_id)
-            DO UPDATE SET quantity = Carts.quantity + 1;
-            `);
+        const result = await pool.query(ADD_TO_CART);
     } catch (error) {
         res.status(500).json({
             message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
@@ -23,23 +23,22 @@ const addItemToCart = async (req, res) => {
     }
 };
 
-// Get user's cart v1
 const getCart = async (req, res) => {
     const user_id = req.user.id; // assuming you have user info from JWT token
 
     try {
-        const result = await pool.query(
-            `SELECT c.id, c.quantity, p.product_name, p.id as product_id, p.images
-            FROM Carts c
-            JOIN Products p ON c.product_id = p.id
-            WHERE c.user_id = $1`,
-            [user_id]
-        );
-        console.log(result.rows);
-
-        res.status(200).json(result.rows);
+        const cart = await pool.query(GET_USER_CART, [user_id]);
+        const grandTotal = await pool.query(GET_CART_TOTAL_BY_USER, [user_id]);
+        res.status(200).json({
+            items: cart.rows,
+            total_amount: grandTotal.rows[0].total_amount,
+            total_quantity: grandTotal.rows[0].total_quantity,
+        });
     } catch (error) {
-        res.status(500).json({ message: "Error fetching cart", error });
+        res.status(500).json({
+            message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+            error,
+        });
     }
 };
 

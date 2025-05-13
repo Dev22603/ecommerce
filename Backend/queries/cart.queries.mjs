@@ -1,16 +1,11 @@
 // /queries/cart.queries.js
 
-export const GET_CART_ITEM = `
-  SELECT id, quantity
-  FROM Carts
-  WHERE user_id = $1 AND product_id = $2;
-`;
-
-export const UPDATE_CART_ITEM_QUANTITY_BY_ID = `
+export const UPDATE_CART_ITEM_QUANTITY = `
   UPDATE Carts
   SET quantity = $1
-  WHERE id = $2
-  RETURNING id, product_id, quantity;
+  WHERE user_id = $2
+  AND product_id = $3
+  RETURNING id, product_id, quantity
 `;
 
 export const GET_PRODUCT_NAME = `
@@ -26,8 +21,8 @@ export const ADD_TO_CART = `
   DO UPDATE SET quantity = Carts.quantity + 1;
 `;
 
-export const GET_CART_ITEMS_BY_USER = `
-  SELECT c.id, c.quantity, p.product_name, p.id AS product_id, p.images
+export const GET_USER_CART = `
+  SELECT c.quantity, p.product_name, p.id AS product_id, p.images, p.sales_price as sales_price, (c.quantity * p.sales_price) AS total_price_per_item
   FROM Carts c
   JOIN Products p ON c.product_id = p.id
   WHERE c.user_id = $1;
