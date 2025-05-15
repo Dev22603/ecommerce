@@ -17,7 +17,11 @@ const addItemToCart = async (req, res) => {
   console.log(user_id);
 
   try {
-    const result = await pool.query(ADD_TO_CART);
+    await pool.query(ADD_TO_CART, [user_id, product_id]);
+
+    res.status(200).json({
+      message: "Product added to cart successfully",
+    });
   } catch (error) {
     res.status(500).json({
       message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
@@ -144,13 +148,14 @@ const removeItemFromCart = async (req, res) => {
     if (deleteResult.rows.length === 0) {
       // If no rows were deleted, the product wasn't in the cart
       return res.status(404).json({
+        success: false,
         message: "Product not found in the cart",
       });
     }
 
     // Fetch the product name for the response
     const productResult = await pool.query(
-      GET_PRODUCT_NAME,
+      "SELECT product_name FROM Products WHERE id = $1",
       [product_id]
     );
 
@@ -221,7 +226,7 @@ const getProductRecommendations = async (req, res) => {
   try {
     // Fetch the product categories of the user's cart items
     const cartProducts = await pool.query(
-      GET_CART_PRODUCTS_CATEGORIES_BY_USER,
+      "SELECT p.category_id, p.product_name FROM Carts c JOIN Products p ON c.product_id = p.id WHERE c.user_id = $1",
       [user_id]
     );
 
