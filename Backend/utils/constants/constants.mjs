@@ -1,62 +1,70 @@
 // constants/product.constants.mjs
 
 const PRODUCT_VALIDATION_ERRORS = {
-	NAME_REQUIRED: "Product name is required.",
-	SALES_PRICE_REQUIRED: "Sales Price is required.",
-	SALES_PRICE_INVALID: "Sales price must be a valid number",
-	SALES_PRICE_MIN: "Sales price must be greater than 0",
+  NAME_REQUIRED: "Product name is required.",
+  SALES_PRICE_REQUIRED: "Sales Price is required.",
+  SALES_PRICE_INVALID: "Sales price must be a valid number",
+  SALES_PRICE_MIN: "Sales price must be greater than 0",
 
-	MRP_REQUIRED: "MRP is required.",
-	MRP_INVALID: "MRP must be a valid number",
-	MRP_MIN: "MRP must be greater than 0",
+  MRP_REQUIRED: "MRP is required.",
+  MRP_INVALID: "MRP must be a valid number",
+  MRP_MIN: "MRP must be greater than 0",
 
-	CATEGORY_ID_REQUIRED: "Category ID is required.",
-	CATEGORY_ID_INVALID: "Category ID must be a valid number",
-	CATEGORY_ID_MIN: "Category ID must be greater than 0",
-	CATEGORY_NOT_FOUND: "Category does not exist.",
+  CATEGORY_ID_REQUIRED: "Category ID is required.",
+  CATEGORY_ID_INVALID: "Category ID must be a valid number",
+  CATEGORY_ID_MIN: "Category ID must be greater than 0",
+  CATEGORY_NOT_FOUND: "Category does not exist.",
 
-	STOCK_REQUIRED: "Stock is required.",
-	STOCK_INVALID: "Stock must be a valid number",
-	STOCK_MIN: "Stock cannot be less than 0",
+  STOCK_REQUIRED: "Stock is required.",
+  STOCK_INVALID: "Stock must be a valid number",
+  STOCK_MIN: "Stock cannot be less than 0",
 
-	IMAGE_REQUIRED: "At least one image is required.",
+  IMAGE_REQUIRED: "At least one image is required.",
 };
 
 const PRODUCT_FEEDBACK_MESSAGES = {
-	NO_PRODUCTS_FOUND: "No products found.",
-	PRODUCT_ADDED_SUCCESS: "Product added successfully",
+  NO_PRODUCTS_FOUND: "No products found.",
+  PRODUCT_ADDED_SUCCESS: "Product added successfully",
 };
 
+const ADDRESS_VALIDATION_ERRORS = {
+  USER_ID_REQUIRED: "User ID is required.",
+  USER_ID_INVALID: "User ID must be a valid number.",
+  USER_ID_MIN: "User ID must be at least 1.",
 
- const ADDRESS_VALIDATION_ERRORS = {
-	USER_ID_REQUIRED: "User ID is required.",
-	USER_ID_INVALID: "User ID must be a valid number.",
-	USER_ID_MIN: "User ID must be at least 1.",
+  FULL_NAME_REQUIRED: "Full name is required.",
+  FULL_NAME_MIN: "Full name must be at least 2 characters.",
 
-	FULL_NAME_REQUIRED: "Full name is required.",
-	FULL_NAME_MIN: "Full name must be at least 2 characters.",
+  PHONE_REQUIRED: "Phone number is required.",
+  PHONE_INVALID: "Phone number must be 10 digits.",
 
-	PHONE_REQUIRED: "Phone number is required.",
-	PHONE_INVALID: "Phone number must be 10 digits.",
+  PINCODE_REQUIRED: "Pincode is required.",
+  PINCODE_INVALID: "Pincode must be a valid 6-digit code.",
 
-	PINCODE_REQUIRED: "Pincode is required.",
-	PINCODE_INVALID: "Pincode must be a valid 6-digit code.",
-
-	HOUSE_NUMBER_REQUIRED: "House number is required.",
-	AREA_REQUIRED: "Area is required.",
-	CITY_REQUIRED: "City is required.",
-	STATE_REQUIRED: "State is required.",
-	ADDRESS_TYPE_REQUIRED: "Address Type cant be an empty string.",
+  HOUSE_NUMBER_REQUIRED: "House number is required.",
+  AREA_REQUIRED: "Area is required.",
+  CITY_REQUIRED: "City is required.",
+  STATE_REQUIRED: "State is required.",
+  ADDRESS_TYPE_REQUIRED: "Address Type cant be an empty string.",
 };
-
 
 const GLOBAL_ERROR_MESSAGES = {
-	SERVER_ERROR: "Internal Server Error. Please try again later.",
+  SERVER_ERROR: "Internal Server Error. Please try again later.",
+};
+const CART_VALIDATION_ERRORS = {
+  PRODUCT_ID_REQUIRED: "Product ID is required",
+  PRODUCT_ID_INVALID: "Product ID must be a valid number",
+  PRODUCT_ID_MIN: "Product ID must be a positive number",
+
+  QUANTITY_REQUIRED: "Quantity is required",
+  QUANTITY_INVALID: "Quantity must be a valid number",
+  QUANTITY_MIN: "Quantity must be a non-negative number",
 };
 
 export {
-	PRODUCT_VALIDATION_ERRORS,
-	PRODUCT_FEEDBACK_MESSAGES,
-	GLOBAL_ERROR_MESSAGES,
-	ADDRESS_VALIDATION_ERRORS
+  PRODUCT_VALIDATION_ERRORS,
+  PRODUCT_FEEDBACK_MESSAGES,
+  GLOBAL_ERROR_MESSAGES,
+  ADDRESS_VALIDATION_ERRORS,
+  CART_VALIDATION_ERRORS,
 };
