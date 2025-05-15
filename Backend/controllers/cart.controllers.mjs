@@ -51,12 +51,8 @@ const updateCart = async (req, res) => {
     const { product_id, quantity } = req.body;
     const user_id = req.user.id;
 
-    // Validation is now handled by middleware
-
-    // If quantity is 0, remove the item from cart instead of updating
     if (quantity === 0) {
       try {
-        // Import the DELETE query if not already imported
         const deleteResult = await pool.query(
           DELETE_CART_ITEM_BY_USER_AND_PRODUCT,
           [user_id, product_id]
@@ -69,7 +65,6 @@ const updateCart = async (req, res) => {
           });
         }
 
-        // Fetch the product name for the response
         const productResult = await pool.query(GET_PRODUCT_NAME, [product_id]);
 
         return res.status(200).json({
@@ -87,7 +82,6 @@ const updateCart = async (req, res) => {
       }
     }
 
-    // Update the cart item quantity
     const updateResult = await pool.query(
       UPDATE_CART_ITEM_BY_USER_AND_PRODUCT,
       [quantity, user_id, product_id]
@@ -138,12 +132,12 @@ const updateCart = async (req, res) => {
 // Remove item from cart
 const removeItemFromCart = async (req, res) => {
   const { product_id } = req.params;
-  const user_id = req.user.id; // assuming you have user info from JWT token
+  const user_id = req.user.id;
 
   try {
     // Delete the product from the cart
     const deleteResult = await pool.query(
-      "DELETE FROM Carts WHERE user_id = $1 AND product_id = $2 RETURNING product_id",
+      DELETE_CART_ITEM_BY_USER_AND_PRODUCT,
       [user_id, product_id]
     );
 
@@ -156,7 +150,7 @@ const removeItemFromCart = async (req, res) => {
 
     // Fetch the product name for the response
     const productResult = await pool.query(
-      "SELECT product_name FROM Products WHERE id = $1",
+      GET_PRODUCT_NAME,
       [product_id]
     );
 
@@ -173,136 +167,17 @@ const removeItemFromCart = async (req, res) => {
   }
 };
 
-// Increment quantity of a product in the cart
-const incrementQuantity = async (req, res) => {
-  const { product_id } = req.body; // Get product_id from request body
-  const user_id = req.user.id; // assuming you have user info from JWT token
-
-  try {
-    // Check if the product exists in the user's cart
-    const cartItemResult = await pool.query(
-      "SELECT id, quantity FROM Carts WHERE user_id = $1 AND product_id = $2",
-      [user_id, product_id]
-    );
-
-    if (cartItemResult.rows.length === 0) {
-      return res.status(404).json({
-        message: "Product not found in the cart",
-      });
-    }
-
-    // Increment the quantity by 1
-    const updatedCartItem = await pool.query(
-      "UPDATE Carts SET quantity = quantity + 1 WHERE id = $1 RETURNING id, product_id, quantity",
-      [cartItemResult.rows[0].id]
-    );
-
-    // Fetch the product name for the response
-    const productResult = await pool.query(
-      "SELECT product_name FROM Products WHERE id = $1",
-      [product_id]
-    );
-
-    // Return the updated cart item with product name
-    res.status(200).json({
-      message: `${productResult.rows[0].product_name} quantity has been incremented.`,
-      product_id: updatedCartItem.rows[0].product_id,
-      quantity: updatedCartItem.rows[0].quantity,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error incrementing cart item quantity",
-      error,
-    });
-  }
-};
-
-// Decrement quantity of a product in the cart
-const decrementQuantity = async (req, res) => {
-  const { product_id } = req.body; // Get product_id from request body
-  const user_id = req.user.id; // assuming you have user info from JWT token
-
-  try {
-    // Check if the product exists in the user's cart
-    const cartItemResult = await pool.query(
-      "SELECT id, quantity FROM Carts WHERE user_id = $1 AND product_id = $2",
-      [user_id, product_id]
-    );
-
-    if (cartItemResult.rows.length === 0) {
-      return res.status(404).json({
-        message: "Product not found in the cart",
-      });
-    }
-
-    // If quantity is greater than 1, decrement by 1, else don't allow it to go below 1
-    const newQuantity =
-      cartItemResult.rows[0].quantity > 1
-        ? cartItemResult.rows[0].quantity - 1
-        : 1;
-
-    const updatedCartItem = await pool.query(
-      "UPDATE Carts SET quantity = $1 WHERE id = $2 RETURNING id, product_id, quantity",
-      [newQuantity, cartItemResult.rows[0].id]
-    );
-
-    // Fetch the product name for the response
-    const productResult = await pool.query(
-      "SELECT product_name FROM Products WHERE id = $1",
-      [product_id]
-    );
-
-    // Return the updated cart item with product name
-    res.status(200).json({
-      message: `${productResult.rows[0].product_name} quantity has been decremented.`,
-      product_id: updatedCartItem.rows[0].product_id,
-      quantity: updatedCartItem.rows[0].quantity,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error decrementing cart item quantity",
-      error,
-    });
-  }
-};
-
 // Clear all items from the user's cart
 const clearCart = async (req, res) => {
   const user_id = req.user.id;
 
   try {
-    await pool.query("DELETE FROM Carts WHERE user_id = $1", [user_id]);
+    await pool.query(CLEAR_CART_BY_USER, [user_id]);
     res.status(200).json({ message: "Cart has been cleared." });
   } catch (error) {
-    res.status(500).json({ message: "Error clearing cart", error });
-  }
-};
-
-// Get the total cost of the items in the user's cart
-const getCartTotal = async (req, res) => {
-  const user_id = req.user.id;
-
-  try {
-    const result = await pool.query(
-      `SELECT COALESCE(SUM(p.sales_price * c.quantity), 0) AS total_amount,
-            COALESCE(SUM(c.quantity),0) AS total_quantity
-			FROM Carts c
-			JOIN Products p ON c.product_id = p.id
-			WHERE c.user_id = $1`,
-      [user_id]
-    );
-
-    // Ensure total_amount is a number, even if it's returned as a string
-    const totalAmount = parseFloat(result.rows[0].total_amount);
-    // Ensure total_quantity is a number, even if it's returned as a string
-    const totalQuantity = parseFloat(result.rows[0].total_quantity);
-
-    res.status(200).json({
-      total_amount: totalAmount,
-      total_quantity: totalQuantity,
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching cart total", error });
+    res
+      .status(500)
+      .json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
   }
 };
 
@@ -313,21 +188,21 @@ const checkCartItemQuantity = async (req, res) => {
 
   try {
     const result = await pool.query(
-      "SELECT quantity, p.product_name FROM Carts c JOIN Products p ON c.product_id = p.id WHERE c.user_id = $1 AND c.product_id = $2",
+      CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
       [user_id, product_id]
     );
 
     if (result.rows.length > 0) {
       const product = result.rows[0];
       res.status(200).json({
-        message: `${product.product_name} is in your cart.`,
-        product_id: product_id,
+        message: "Product found in your cart.",
+        product: product.product_name,
         quantity: product.quantity,
       });
     } else {
       res.status(201).json({
         message: "Product not found in your cart.",
-        product_id: product_id,
+        product: product.product_name,
         quantity: 0,
       });
     }
@@ -346,7 +221,7 @@ const getProductRecommendations = async (req, res) => {
   try {
     // Fetch the product categories of the user's cart items
     const cartProducts = await pool.query(
-      "SELECT p.category_id, p.product_name FROM Carts c JOIN Products p ON c.product_id = p.id WHERE c.user_id = $1",
+      GET_CART_PRODUCTS_CATEGORIES_BY_USER,
       [user_id]
     );
 
@@ -392,10 +267,7 @@ export {
   updateCart,
   removeItemFromCart,
   addItemToCart,
-  incrementQuantity,
-  decrementQuantity,
   clearCart,
-  getCartTotal,
   checkCartItemQuantity,
   getProductRecommendations,
 };

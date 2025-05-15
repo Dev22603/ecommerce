@@ -4,11 +4,8 @@ import {
     addItemToCart,
     checkCartItemQuantity,
     clearCart,
-    decrementQuantity,
     getCart,
-    getCartTotal,
     getProductRecommendations,
-    incrementQuantity,
     removeItemFromCart,
     updateCart,
 } from "../controllers/cart.controllers.mjs";
@@ -22,11 +19,8 @@ router.post("/add", authenticate, addItemToCart);
 router.get("/", authenticate, getCart);
 router.put("/update", authenticate, validateCartUpdate, updateCart);
 router.delete("/remove/:product_id", authenticate, removeItemFromCart);
-router.patch("/increment", authenticate, incrementQuantity); // Increment quantity route (with product_id in body)
-router.patch("/decrement", authenticate, decrementQuantity); // Decrement quantity route (with product_id in body)
 router.post("/check-quantity", authenticate, checkCartItemQuantity); // Route to check the quantity of a specific product in the user's cart
 router.get("/recommendations", authenticate, getProductRecommendations); // Route to get product recommendations based on the user's cart
 router.delete("/clear", authenticate, clearCart); // Route to clear all items from the user's cart
-router.get("/total", authenticate, getCartTotal); // Route to get the total price of all items in the user's cart
 
 export default router;
