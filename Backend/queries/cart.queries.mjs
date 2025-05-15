@@ -1,12 +1,5 @@
 // /queries/cart.queries.js
 
-export const UPDATE_CART_ITEM_QUANTITY = `
-  UPDATE Carts
-  SET quantity = $1
-  WHERE user_id = $2
-  AND product_id = $3
-  RETURNING id, product_id, quantity
-`;
 
 export const GET_PRODUCT_NAME = `
   SELECT product_name
@@ -31,8 +24,10 @@ export const GET_USER_CART = `
 export const UPDATE_CART_ITEM_BY_USER_AND_PRODUCT = `
   UPDATE Carts
   SET quantity = $1
-  WHERE user_id = $2 AND product_id = $3
-  RETURNING id, product_id, quantity;
+  WHERE user_id = $2 
+  AND
+  product_id = $3
+  RETURNING product_id, quantity;
 `;
 
 export const DELETE_CART_ITEM_BY_USER_AND_PRODUCT = `
@@ -47,11 +42,6 @@ export const INCREMENT_CART_ITEM_QUANTITY_BY_ID = `
   WHERE id = $1
   RETURNING id, product_id, quantity;
 `;
-
-// Note: for decrement, we calculate new quantity in controller
-export const DECREMENT_CART_ITEM_QUANTITY_BY_ID =
-    UPDATE_CART_ITEM_QUANTITY_BY_ID;
-
 export const CLEAR_CART_BY_USER = `
   DELETE FROM Carts
   WHERE user_id = $1;

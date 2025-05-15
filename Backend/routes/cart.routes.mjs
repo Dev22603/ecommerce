@@ -13,13 +13,14 @@ import {
     updateCart,
 } from "../controllers/cart.controllers.mjs";
 import { authenticate } from "../middlewares/auth.mjs";
+import { validateCartUpdate } from "../middlewares/validate_cart.mjs";
 
 const router = express.Router();
 
 // Add item to cart (protected route)
 router.post("/add", authenticate, addItemToCart);
 router.get("/", authenticate, getCart);
-router.put("/update", authenticate, updateCart);
+router.put("/update", authenticate, validateCartUpdate, updateCart);
 router.delete("/remove/:product_id", authenticate, removeItemFromCart);
 router.patch("/increment", authenticate, incrementQuantity); // Increment quantity route (with product_id in body)
 router.patch("/decrement", authenticate, decrementQuantity); // Decrement quantity route (with product_id in body)
