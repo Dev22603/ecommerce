@@ -7,6 +7,7 @@ import {
   UPDATE_CART_ITEM_BY_USER_AND_PRODUCT,
   DELETE_CART_ITEM_BY_USER_AND_PRODUCT,
   GET_PRODUCT_NAME,
+  CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
 } from "../queries/cart.queries.mjs";
 import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
 
@@ -15,13 +16,14 @@ const addItemToCart = async (req, res) => {
   const { product_id } = req.body; // Only product_id is provided in the request
   const user_id = req.user.id;
   console.log(user_id);
+  console.log(product_id);
 
   try {
     await pool.query(ADD_TO_CART, [user_id, product_id]);
-
     res.status(200).json({
       message: "Product added to cart successfully",
     });
+
   } catch (error) {
     res.status(500).json({
       message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
@@ -190,6 +192,7 @@ const clearCart = async (req, res) => {
 const checkCartItemQuantity = async (req, res) => {
   const { product_id } = req.body; // Get product_id from request body
   const user_id = req.user.id;
+  console.log(user_id);
 
   try {
     const result = await pool.query(
@@ -211,61 +214,14 @@ const checkCartItemQuantity = async (req, res) => {
         quantity: 0,
       });
     }
-  } catch (err) {
-    res.status(500).json({
-      message: "Error checking cart item quantity.",
-      err,
-    });
-  }
-};
-
-// Get product recommendations based on the items in the user's cart
-const getProductRecommendations = async (req, res) => {
-  const user_id = req.user.id;
-
-  try {
-    // Fetch the product categories of the user's cart items
-    const cartProducts = await pool.query(
-      "SELECT p.category_id, p.product_name FROM Carts c JOIN Products p ON c.product_id = p.id WHERE c.user_id = $1",
-      [user_id]
-    );
-
-    if (cartProducts.rows.length === 0) {
-      return res.status(404).json({
-        message: "No products found in your cart for recommendations.",
-      });
-    }
-
-    const category_ids = cartProducts.rows.map((row) => row.category_id);
-
-    // Fetch recommended products based on the cart's categories
-    const recommendedProducts = await pool.query(
-      "SELECT id, product_name, category_id, sales_price FROM Products WHERE category_id = ANY($1::int[]) AND id NOT IN (SELECT product_id FROM Carts WHERE user_id = $2) LIMIT 5",
-      [category_ids, user_id]
-    );
-
-    if (recommendedProducts.rows.length > 0) {
-      res.status(200).json({
-        message: "Here are some recommended products based on your cart items:",
-        recommendations: recommendedProducts.rows.map((product) => ({
-          product_id: product.id,
-          product_name: product.product_name,
-          category_id: product.category_id,
-          sales_price: product.sales_price,
-        })),
-      });
-    } else {
-      res.status(404).json({
-        message: "No recommendations found based on your cart items.",
-      });
-    }
   } catch (error) {
     res.status(500).json({
-      message: "Error fetching product recommendations.",
-      error: error.message,
+      message: "Error checking cart item quantity.",
+      error: error,
     });
   }
 };
+
 
 export {
   getCart,
@@ -274,5 +230,4 @@ export {
   addItemToCart,
   clearCart,
   checkCartItemQuantity,
-  getProductRecommendations,
 };

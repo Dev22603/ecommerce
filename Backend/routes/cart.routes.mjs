@@ -5,7 +5,6 @@ import {
     checkCartItemQuantity,
     clearCart,
     getCart,
-    getProductRecommendations,
     removeItemFromCart,
     updateCart,
 } from "../controllers/cart.controllers.mjs";
@@ -20,7 +19,6 @@ router.get("/", authenticate, getCart);
 router.put("/update", authenticate, validateCartUpdate, updateCart);
 router.delete("/remove/:product_id", authenticate, removeItemFromCart);
 router.post("/check-quantity", authenticate, checkCartItemQuantity); // Route to check the quantity of a specific product in the user's cart
-router.get("/recommendations", authenticate, getProductRecommendations); // Route to get product recommendations based on the user's cart
 router.delete("/clear", authenticate, clearCart); // Route to clear all items from the user's cart
 
 export default router;
