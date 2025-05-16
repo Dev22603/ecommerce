@@ -68,15 +68,3 @@ export const GET_CART_PRODUCTS_CATEGORIES_BY_USER = `
   JOIN Products p ON c.product_id = p.id
   WHERE c.user_id = $1;
 `;
-
-export const GET_RECOMMENDED_PRODUCTS = `
-  SELECT id, product_name, category_id, sales_price
-  FROM Products
-  WHERE category_id = ANY($1::int[])
-    AND id NOT IN (
-      SELECT product_id
-      FROM Carts
-      WHERE user_id = $2
-    )
-  LIMIT 5;
-`;
