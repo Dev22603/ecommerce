@@ -27,7 +27,7 @@ CREATE TABLE Carts (
     product_id INTEGER NOT NULL REFERENCES Products(id) ON DELETE CASCADE,
     quantity INTEGER NOT NULL CHECK (quantity > 0),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (user_id, product_id) -- 🔥 This line is the magic
+    UNIQUE (user_id, product_id) 
 );
 
 CREATE TYPE order_status AS ENUM ('Pending', 'Shipped', 'Cancelled');
