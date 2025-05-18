@@ -9,16 +9,24 @@ import {
   GET_PRODUCT_NAME,
   CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
 } from "../queries/cart.queries.mjs";
+import { GET_PRODUCT_STOCK } from "../queries/product.queries.mjs";
 import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
 
 // Add to Cart inspired by Amazon
 const addItemToCart = async (req, res) => {
   const { product_id } = req.body; // Only product_id is provided in the request
   const user_id = req.user.id;
-  console.log(user_id);
-  console.log(product_id);
 
   try {
+
+    const productStock = await pool.query(GET_PRODUCT_STOCK, [product_id]);
+    const stockAvailable = productStock.rows[0].stock;
+    if (stockAvailable === 0) {
+      return res.status(400).json({
+        message: "Product is out of stock",
+
+      });
+    }
     await pool.query(ADD_TO_CART, [user_id, product_id]);
     res.status(200).json({
       message: "Product added to cart successfully",
@@ -57,6 +65,22 @@ const updateCart = async (req, res) => {
     const { product_id, quantity } = req.body;
     const user_id = req.user.id;
 
+    const productStock = await pool.query(GET_PRODUCT_STOCK, [product_id]);
+    const stockAvailable = productStock.rows[0].stock;
+    if (stockAvailable === 0) {
+      return res.status(400).json({
+        message: "Product is out of stock",
+
+      });
+    }
+    else if (stockAvailable < quantity) {
+      return res.status(400).json({
+        message: "Not enough stock available",
+        stock_available: stockAvailable,
+      });
+    }
+
+
     if (quantity === 0) {
       try {
         const deleteResult = await pool.query(
@@ -76,7 +100,6 @@ const updateCart = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: `${productResult.rows[0].product_name} has been removed from your cart.`,
-          product_id: parseInt(product_id, 10),
         });
       } catch (error) {
         console.error("Error removing item from cart:", error);
