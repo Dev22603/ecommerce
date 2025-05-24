@@ -24,6 +24,7 @@ const PRODUCT_VALIDATION_ERRORS = {
 
 const PRODUCT_FEEDBACK_MESSAGES = {
   NO_PRODUCTS_FOUND: "No products found.",
+  NO_PRODUCT_FOUND_BY_ID: "No product found for the given product id.",
   PRODUCT_ADDED_SUCCESS: "Product added successfully",
 };
 
