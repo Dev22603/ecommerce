@@ -13,9 +13,7 @@ const INSERT_PRODUCT = `
 `;
 
 const CHECK_CATEGORY_EXISTS = `
-  SELECT EXISTS (
-  SELECT 1 FROM Categories WHERE id = $1
-  );
+  SELECT EXISTS(SELECT 1 FROM Categories WHERE id = $1) AS "exists";
 `;
 
 const SEARCH_PRODUCTS_BY_NAME = `

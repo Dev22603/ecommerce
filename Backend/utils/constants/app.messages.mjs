@@ -22,6 +22,33 @@ const PRODUCT_VALIDATION_ERRORS = {
   IMAGE_REQUIRED: "At least one image is required.",
 };
 
+const USER_VALIDATION_ERRORS = {
+	NAME_REQUIRED: "Name is required.",
+	NAME_MIN: "Name must be at least 2 characters.",
+
+	EMAIL_REQUIRED: "Email is required.",
+	EMAIL_INVALID: "Email must be a valid email address.",
+
+  
+	PASSWORD_REQUIRED: "Password is required.",
+	PASSWORD_INVALID: "Password must be at least 8 characters long, include at least one uppercase letter, one lowercase letter, one number, and one special character",
+};
+
+const USER_FEEDBACK_MESSAGES = {
+  USER_CREATED_SUCCESS: "User created successfully",
+  USER_LOGIN_SUCCESS: "User logged in successfully",
+  USER_LOGOUT_SUCCESS: "User logged out successfully",
+  USER_DELETED_SUCCESS: "User deleted successfully",
+  USER_UPDATED_SUCCESS: "User updated successfully",
+  USER_NOT_FOUND: "User not found",
+  USER_ALREADY_EXISTS: "User already exists",
+  USER_NOT_AUTHENTICATED: "User not authenticated",
+  USER_NOT_AUTHORIZED: "User not authorized",
+  INVALID_CREDENTIALS: "Invalid credentials",
+
+}
+
+
 const PRODUCT_FEEDBACK_MESSAGES = {
   NO_PRODUCTS_FOUND: "No products found.",
   NO_PRODUCT_FOUND_BY_ID: "No product found for the given product id.",
@@ -67,5 +94,7 @@ export {
   PRODUCT_FEEDBACK_MESSAGES,
   GLOBAL_ERROR_MESSAGES,
   ADDRESS_VALIDATION_ERRORS,
+  USER_VALIDATION_ERRORS,
+  USER_FEEDBACK_MESSAGES,
   CART_VALIDATION_ERRORS,
 };
