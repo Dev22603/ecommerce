@@ -1,6 +1,5 @@
 // /queries/cart.queries.js
 
-
 export const GET_PRODUCT_NAME = `
   SELECT product_name
   FROM Products
