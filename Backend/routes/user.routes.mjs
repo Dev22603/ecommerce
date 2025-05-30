@@ -1,7 +1,11 @@
 // routes/user.routes.mjs
 
 import express from "express";
-import { signup, login } from "../controllers/user.controllers.mjs";
+import {
+	signup,
+	login,
+	getAllUsers,
+} from "../controllers/user.controllers.mjs";
 
 const router = express.Router();
 
@@ -10,4 +14,6 @@ router.post("/signup", signup);
 
 // Login route
 router.post("/login", login);
+router.get("/users", getAllUsers);
+
 export default router;
