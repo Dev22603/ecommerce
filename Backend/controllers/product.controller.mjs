@@ -207,6 +207,11 @@ const getProductById = async (req, res) => {
 	const { id } = req.params;
 
 	try {
+		if (isNaN(id)) {
+			return res.status(400).json({
+				error: "id is an integer",
+			});
+		}
 		const result = await pool.query(GET_PRODUCT_BY_ID, [id]);
 		const product = result.rows[0];
 
@@ -218,6 +223,7 @@ const getProductById = async (req, res) => {
 
 		return res.status(200).json(product);
 	} catch (error) {
+		console.log(error);
 		return res.status(500).json({
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error: error,
@@ -242,6 +248,11 @@ const deleteProduct = async (req, res) => {
 	const { id } = req.params;
 
 	try {
+		if (isNaN(id)) {
+			return res.status(400).json({
+				error: "id is an integer",
+			});
+		}
 		const result = await pool.query(DELETE_PRODUCT, [id]);
 		const product = result.rows[0];
 

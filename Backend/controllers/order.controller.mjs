@@ -1,20 +1,17 @@
 // Backend\controllers\order.controller.mjs
 import { pool } from "../db/db.mjs";
 import {
-	GET_CART_TOTAL_BY_USER,
 	GET_USER_CART_ITEMS,
 	CLEAR_CART_BY_USER,
 } from "../queries/cart.queries.mjs";
 import {
 	GET_USER_ORDERS,
 	INSERT_ORDER,
-	GET_USER_ORDERS_WITH_ITEMS,
 	GET_ORDER_DETAILS,
 	UPDATE_ORDER_STATUS,
 	GET_ORDER_STATUS,
 	GET_ALL_ORDERS_WITH_ITEMS,
 	GET_ALL_ORDERS_COUNT,
-	INSERT_ORDER_ITEMS,
 } from "../queries/order.queries.mjs";
 import {
 	ORDER_VALIDATION_ERRORS,
@@ -59,7 +56,7 @@ const createOrder = async (req, res) => {
 
 		// Calculate total amount
 		const total_amount = cartItems.rows.reduce(
-			(sum, item) => sum + item.quantity * item.sales_price,
+			(sum, item) => sum + item.total_price_per_item,
 			0
 		);
 
@@ -72,17 +69,31 @@ const createOrder = async (req, res) => {
 		const order_id = orderResult.rows[0].id;
 
 		// Batch update stock levels
-		const stockUpdates = cartItems.rows
-			.map(
-				(item) =>
-					`(
+		// Prepare stock update queries with parameters
+		const stockUpdates = cartItems.rows.map((item, index) => {
+			return `
 				UPDATE Products 
-				SET stock = stock - ${item.quantity} 
-				WHERE id = ${item.product_id}
-			)`
-			)
-			.join("; ");
-		await pool.query(`BEGIN; ${stockUpdates}; COMMIT;`);
+				SET stock = GREATEST(0, stock - $${index * 2 + 1}) 
+				WHERE id = $${index * 2 + 2}
+				AND stock >= $${index * 2 + 1}
+			`;
+		});
+
+		// Create parameter array
+		const params = cartItems.rows.flatMap((item) => [
+			item.quantity,
+			item.product_id,
+		]);
+
+		// Execute all updates in a single transaction
+		await pool.query(
+			`
+			BEGIN;
+			${stockUpdates.join(";\n")};
+			COMMIT;
+		`,
+			params
+		);
 
 		// Batch insert order items
 		const orderItems = cartItems.rows

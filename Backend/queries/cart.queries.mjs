@@ -58,13 +58,7 @@ export const CLEAR_CART_BY_USER = `
 	WHERE user_id = $1;
 `;
 
-export const GET_CART_TOTAL_BY_USER = `
-	SELECT COALESCE(SUM(p.sales_price * c.quantity), 0) AS total_amount,
-				 COALESCE(SUM(c.quantity), 0) AS total_quantity
-	FROM Carts c
-	JOIN Products p ON c.product_id = p.id
-	WHERE c.user_id = $1;
-`;
+
 
 export const CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT = `
 	SELECT quantity, p.product_name
