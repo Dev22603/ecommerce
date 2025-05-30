@@ -14,6 +14,7 @@ import {
 	GET_ORDER_STATUS,
 	GET_ALL_ORDERS_WITH_ITEMS,
 	GET_ALL_ORDERS_COUNT,
+	INSERT_ORDER_ITEMS,
 } from "../queries/order.queries.mjs";
 import {
 	ORDER_VALIDATION_ERRORS,
@@ -33,18 +34,9 @@ const createOrder = async (req, res) => {
 	try {
 		// Start a transaction
 		await pool.query("BEGIN");
-		// Calculate total amount from the cart
-		const totalAmountResult = await pool.query(GET_CART_TOTAL_BY_USER, [
-			user_id,
-		]);
 
-		const total_amount = parseFloat(totalAmountResult.rows[0].total_amount);
-
-		// Get the items from the user's cart
-		const cartItems = await pool.query(
-			GET_USER_CART_ITEMS, // product_name, quantity, product_id, sales_price, total_price_per_item
-			[user_id]
-		);
+		// Get cart items and total amount in a single query
+		const cartItems = await pool.query(GET_USER_CART_ITEMS, [user_id]);
 
 		if (cartItems.rows.length === 0) {
 			// If the cart is empty, rollback the transaction
@@ -54,6 +46,20 @@ const createOrder = async (req, res) => {
 				.json({ message: ORDER_VALIDATION_ERRORS.CART_EMPTY });
 		}
 
+		// Check stock availability for all items
+		const insufficientStock = cartItems.rows.find(item => item.stock < item.quantity);
+		if (insufficientStock) {
+			await pool.query("ROLLBACK");
+			return res
+				.status(400)
+				.json({ 
+					message: `Insufficient stock for product: ${insufficientStock.product_name}. Available: ${insufficientStock.stock}, Required: ${insufficientStock.quantity}`
+				});
+		}
+
+		// Calculate total amount
+		const total_amount = cartItems.rows.reduce((sum, item) => sum + (item.quantity * item.sales_price), 0);
+
 		// Create the order
 		const orderResult = await pool.query(INSERT_ORDER, [
 			user_id,
@@ -61,6 +67,23 @@ const createOrder = async (req, res) => {
 			address_id,
 		]);
 		const order_id = orderResult.rows[0].id;
+
+		// Batch update stock levels
+		const stockUpdates = cartItems.rows.map(item => 
+			`(
+				UPDATE Products 
+				SET stock = stock - ${item.quantity} 
+				WHERE id = ${item.product_id}
+			)`
+		).join('; ');
+		await pool.query(`BEGIN; ${stockUpdates}; COMMIT;`);
+
+		// Batch insert order items
+		const orderItems = cartItems.rows.map(item => `(${order_id}, ${item.product_id}, ${item.quantity}, ${item.sales_price})`).join(', ');
+		await pool.query(`
+			INSERT INTO Order_Items (order_id, product_id, quantity, price)
+			VALUES ${orderItems}
+		`);
 
 		await pool.query(CLEAR_CART_BY_USER, [user_id]);
 

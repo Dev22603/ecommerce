@@ -121,8 +121,14 @@ SELECT COUNT(DISTINCT o.id) AS total_orders
              FROM Orders o;
 `;
 
+const INSERT_ORDER_ITEMS = `
+INSERT INTO Order_Items (order_id, product_id, quantity, price)
+VALUES ($1, $2, $3, $4);
+`;
+
 export {
 	INSERT_ORDER,
+	INSERT_ORDER_ITEMS,
 	GET_USER_ORDERS,
 	GET_ORDER_DETAILS,
 	GET_ORDER_DETAILS_OLD,
