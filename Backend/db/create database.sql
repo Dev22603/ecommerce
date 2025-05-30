@@ -30,7 +30,7 @@ CREATE TABLE Carts (
     UNIQUE (user_id, product_id) 
 );
 
-CREATE TYPE order_status AS ENUM ('Pending', 'Shipped', 'Cancelled');
+CREATE TYPE order_status AS ENUM ('pending', 'delivered', 'completed', 'cancelled');
 
 
 

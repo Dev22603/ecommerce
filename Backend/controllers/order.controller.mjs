@@ -1,15 +1,35 @@
 // Backend\controllers\order.controller.mjs
 import { pool } from "../db/db.mjs";
-import { GET_CART_TOTAL_BY_USER } from "../queries/cart.queries.mjs";
-import { INSERT_ORDER } from "../queries/order.queries.mjs";
+import {
+	GET_CART_TOTAL_BY_USER,
+	GET_USER_CART_ITEMS,
+	CLEAR_CART_BY_USER,
+} from "../queries/cart.queries.mjs";
+import {
+	GET_USER_ORDERS,
+	INSERT_ORDER,
+	GET_USER_ORDERS_WITH_ITEMS,
+	GET_ORDER_DETAILS,
+	UPDATE_ORDER_STATUS,
+	GET_ORDER_STATUS,
+	GET_ALL_ORDERS_WITH_ITEMS,
+	GET_ALL_ORDERS_COUNT,
+} from "../queries/order.queries.mjs";
+import {
+	ORDER_VALIDATION_ERRORS,
+	ORDER_FEEDBACK_MESSAGES,
+	GLOBAL_ERROR_MESSAGES,
+} from "../utils/constants/app.messages.mjs";
+import { validatePagination, formatDate } from "../utils/common_functions.mjs";
+import { ORDER } from "../utils/constants/app.constants.mjs";
 // Create order from cart
 const createOrder = async (req, res) => {
 	const user_id = req.user.id; // assuming you have user info from JWT token
-    const {address_id} = req.body;
-    if(!address_id){
-        //get the default address
-        //TODO: complete the get default address
-    }
+	const { address_id } = req.body;
+	if (!address_id) {
+		//get the default address
+		//TODO: complete the get default address
+	}
 	try {
 		// Start a transaction
 		await pool.query("BEGIN");
@@ -19,41 +39,54 @@ const createOrder = async (req, res) => {
 		]);
 
 		const total_amount = parseFloat(totalAmountResult.rows[0].total_amount);
-        // user_id, total_amount, address_id, order_status
-        //TODO: complete the create order
 
+		// Get the items from the user's cart
+		const cartItems = await pool.query(
+			GET_USER_CART_ITEMS, // product_name, quantity, product_id, sales_price, total_price_per_item
+			[user_id]
+		);
 
-		// Clear the user's cart
-		await pool.query("DELETE FROM Carts WHERE user_id = $1", [user_id]);
+		if (cartItems.rows.length === 0) {
+			// If the cart is empty, rollback the transaction
+			await pool.query("ROLLBACK");
+			return res
+				.status(400)
+				.json({ message: ORDER_VALIDATION_ERRORS.CART_EMPTY });
+		}
+
+		// Create the order
+		const orderResult = await pool.query(INSERT_ORDER, [
+			user_id,
+			total_amount,
+			address_id,
+		]);
+		const order_id = orderResult.rows[0].id;
+
+		await pool.query(CLEAR_CART_BY_USER, [user_id]);
 
 		// Commit the transaction
 		await pool.query("COMMIT");
 
 		res.status(201).json({
-			message: "Order created successfully",
+			message: ORDER_FEEDBACK_MESSAGES.ORDER_CREATED_SUCCESS,
 			order_id,
 		});
 	} catch (error) {
 		// Rollback the transaction in case of an error
 		await pool.query("ROLLBACK");
 		res.status(500).json({
-			message: "Error creating order",
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error: error.message,
 		});
 	}
 };
 
-// Get user's orders v2 pagination
+// Get user's orders
 const getUserOrders = async (req, res) => {
-	const user_id = req.user.id; // Assuming the user info is provided by JWT token
-	const { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
+	const user_id = req.user.id;
+	const { page, limit, offset } = validatePagination(req);
 
 	try {
-		// Validate page and limit
-		const validatedPage = Math.max(1, parseInt(page, 10) || 1);
-		const validatedLimit = Math.max(1, parseInt(limit, 10) || 10);
-		const offset = (validatedPage - 1) * validatedLimit;
-
 		// Query to get total orders count for pagination
 		const totalCountResult = await pool.query(
 			`SELECT COUNT(*) FROM Orders WHERE user_id = $1`,
@@ -62,23 +95,19 @@ const getUserOrders = async (req, res) => {
 		const totalCount = parseInt(totalCountResult.rows[0].count, 10);
 
 		// Query to fetch the user's paginated orders with order details
-		const result = await pool.query(
-			`SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at,
-                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
-             FROM Orders o
-             JOIN Order_Items oi ON o.id = oi.order_id
-             JOIN Products p ON oi.product_id = p.id
-             WHERE o.user_id = $1
-             ORDER BY o.created_at DESC
-             LIMIT $2 OFFSET $3`,
-			[user_id, validatedLimit, offset]
-		);
+		const result = await pool.query(GET_USER_ORDERS, [
+			user_id,
+			limit,
+			offset,
+		]);
 
 		// If no orders are found
 		if (result.rows.length === 0) {
-			return res.status(404).json({ message: "No orders found" });
+			return res
+				.status(404)
+				.json({ message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND });
 		}
-
+		/*
 		// Group orders by order_id and accumulate order items under each order
 		const orders = result.rows.reduce((acc, row) => {
 			const existingOrder = acc.find(
@@ -111,19 +140,26 @@ const getUserOrders = async (req, res) => {
 			}
 			return acc;
 		}, []);
+		*/
+
+		// Format the created_at date and prepare the response
+		const orders = result.rows.map((row) => ({
+			...row,
+			created_at: formatDate(row.created_at),
+		}));
 
 		// Respond with paginated orders and metadata
 		res.status(200).json({
-			page: validatedPage,
-			limit: validatedLimit,
+			page,
+			limit,
 			total_count: totalCount,
-			total_pages: Math.ceil(totalCount / validatedLimit),
+			total_pages: Math.ceil(totalCount / limit),
 			orders: orders,
 		});
 	} catch (error) {
 		console.error("Error fetching user orders:", error);
 		res.status(500).json({
-			message: "An error occurred while fetching user orders",
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
@@ -132,15 +168,7 @@ const getOrderDetails = async (req, res) => {
 	const { order_id } = req.params;
 
 	try {
-		const orderDetails = await pool.query(
-			`SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
-                    oi.product_id, oi.quantity, p.product_name, oi.price AS product_price
-             FROM Orders o
-             JOIN Order_Items oi ON o.id = oi.order_id
-             JOIN Products p ON oi.product_id = p.id
-             WHERE o.id = $1`,
-			[order_id]
-		);
+		const orderDetails = await pool.query(GET_ORDER_DETAILS, [order_id]);
 
 		if (orderDetails.rows.length === 0) {
 			return res.status(404).json({ message: "Order not found" });
@@ -155,9 +183,10 @@ const getOrderDetails = async (req, res) => {
 		} = orderDetails.rows[0];
 
 		// Format the created_at date as dd/mm/yyyy
-		const formattedDate = new Date(created_at).toLocaleDateString("en-GB");
+		const formattedDate = formatDate(created_at);
 
 		// Transform the data to group items under the order
+		/*
 		const response = {
 			order_id: id,
 			user_id,
@@ -170,48 +199,52 @@ const getOrderDetails = async (req, res) => {
 				sales_price: parseFloat(item.product_price),
 			})),
 		};
+		*/
+		const response = orderDetails.rows[0];
 
-		res.status(200).json(response);
+		return res.status(200).json(response);
 	} catch (error) {
-		res.status(500).json({
-			message: "Error fetching order details",
+		return res.status(500).json({
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error,
 		});
 	}
 };
 const cancelOrder = async (req, res) => {
 	const { order_id } = req.params;
-	const user_id = req.user.id;
 
 	try {
 		// Check if the order exists and belongs to the user
-		const orderCheck = await pool.query(
-			"SELECT id FROM Orders WHERE id = $1 AND user_id = $2",
-			[order_id, user_id]
-		);
+		const orderCheck = await pool.query(GET_ORDER_STATUS, [order_id]);
 
 		if (orderCheck.rows.length === 0) {
 			return res
 				.status(404)
-				.json({ message: "Order not found or access denied" });
-		}
-		const orderStatus = orderCheck.rows[0].status; // Retrieve the status of the order
-
-		if (orderStatus !== "Pending") {
-			return res
-				.status(400)
-				.json({ message: "Cannot cancel order that is not pending." });
+				.json({ message: ORDER_FEEDBACK_MESSAGES.ORDER_NOT_FOUND });
 		}
 
-		// Delete the order and related items
-		await pool.query("DELETE FROM Order_Items WHERE order_id = $1", [
+		const orderStatus = orderCheck.rows[0].status;
+
+		if (orderStatus !== ORDER.STATUS.PENDING) {
+			return res.status(400).json({
+				message: `Cannot cancel order that is not ${ORDER.STATUS.PENDING.toLowerCase()}.`,
+			});
+		}
+
+		// Update the order status to cancelled
+		await pool.query(UPDATE_ORDER_STATUS, [
+			ORDER.STATUS.CANCELLED,
 			order_id,
 		]);
-		await pool.query("DELETE FROM Orders WHERE id = $1", [order_id]);
 
-		res.status(200).json({ message: "Order cancelled successfully" });
+		return res.status(200).json({
+			message: ORDER_FEEDBACK_MESSAGES.ORDER_CANCELLED_SUCCESS,
+			order_id,
+		});
 	} catch (error) {
-		res.status(500).json({ message: "Error cancelling order", error });
+		return res
+			.status(500)
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
 	}
 };
 
@@ -219,76 +252,49 @@ const updateOrderStatus = async (req, res) => {
 	const { order_id } = req.params;
 	const { status } = req.body;
 
-	// List of valid statuses (same as the ENUM in the database)
-	const validStatuses = ["Pending", "Shipped", "Completed", "Cancelled"];
-
 	// Check if the provided status is valid
-	if (!validStatuses.includes(status)) {
+	if (!ORDER.STATUS.values.includes(status)) {
 		return res.status(400).json({
-			message:
-				"Invalid status. Allowed values are: Pending, Shipped, Completed, Cancelled.",
+			message: `Invalid status. Allowed values are: ${ORDER.STATUS.values.join(
+				", "
+			)}.`,
 		});
 	}
 
 	try {
 		// Update the order status
-		const result = await pool.query(
-			"UPDATE Orders SET status = $1 WHERE id = $2 RETURNING *",
-			[status, order_id]
-		);
+		const result = await pool.query(UPDATE_ORDER_STATUS, [
+			status,
+			order_id,
+		]);
 
 		if (result.rows.length === 0) {
 			return res.status(404).json({ message: "Order not found" });
 		}
 
-		res.status(200).json({
+		return res.status(200).json({
 			message: "Order status updated successfully",
 			order: result.rows[0],
 		});
 	} catch (error) {
-		res.status(500).json({ message: "Error updating order status", error });
+		return res
+			.status(500)
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
 	}
 };
 
-// Get All Orders (Admin Only) v2
+// Get All Orders (Admin Only)
 const getAllOrders = async (req, res) => {
-	let { page = 1, limit = 10 } = req.query; // Default to page 1, limit 10
-
-	// Validate page and limit to ensure they are numbers and positive
-	page = parseInt(page, 10);
-	limit = parseInt(limit, 10);
-
-	if (isNaN(page) || page < 1) {
-		return res.status(400).json({ message: "Invalid page number" });
-	}
-
-	if (isNaN(limit) || limit < 1) {
-		return res.status(400).json({ message: "Invalid limit number" });
-	}
+	const { page, limit, offset } = validatePagination(req);
 
 	try {
-		// Calculate offset based on page and limit
-		const offset = (page - 1) * limit;
-
-		// Query to fetch orders with user details, order items, and product details
-		const result = await pool.query(
-			`SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
-                    u.name AS user_name, o.status,
-                    oi.product_id, oi.quantity, oi.price AS item_price, p.product_name
-             FROM Orders o
-             JOIN Users u ON o.user_id = u.id
-             JOIN Order_Items oi ON o.id = oi.order_id
-             JOIN Products p ON oi.product_id = p.id
-             ORDER BY o.created_at DESC
-             LIMIT $1 OFFSET $2`,
-			[limit, offset]
-		);
+		const result = await pool.query(GET_ALL_ORDERS_WITH_ITEMS, [
+			limit,
+			offset,
+		]);
 
 		// Query to fetch total number of orders for pagination
-		const totalCountResult = await pool.query(
-			`SELECT COUNT(DISTINCT o.id) AS total_orders
-             FROM Orders o`
-		);
+		const totalCountResult = await pool.query(GET_ALL_ORDERS_COUNT);
 
 		const totalOrders = parseInt(totalCountResult.rows[0].total_orders, 10);
 
@@ -296,8 +302,25 @@ const getAllOrders = async (req, res) => {
 
 		// If no orders are found
 		if (result.rows.length === 0) {
-			return res.status(404).json({ message: "No orders found" });
+			return res
+				.status(404)
+				.json({
+					message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND_ADMIN,
+				});
 		}
+		// const response = result.rows.map(user => ({
+		// 	user_id: user.user_id,
+		// 	user_name: user.user_name,
+		// 	orders: user.orders.map(order => ({
+		// 		order_id: order.order_id,
+		// 		total_amount: order.total_amount,
+		// 		created_at: order.created_at,
+		// 		status: order.status,
+		// 		order_items: order.order_items || []
+		// 	}))
+		// }));
+		// TODO: left
+
 
 		// Group orders by user_id and then by order_id, accumulating order items under each order
 		const users = result.rows.reduce((acc, row) => {
@@ -365,7 +388,7 @@ const getAllOrders = async (req, res) => {
 		}, []);
 
 		// Respond with the paginated orders grouped by user_id
-		res.status(200).json({
+		return res.status(200).json({
 			page: page,
 			limit: limit,
 			totalOrders: totalOrders,
@@ -373,10 +396,9 @@ const getAllOrders = async (req, res) => {
 			users: users,
 		});
 	} catch (error) {
-		res.status(500).json({
-			message: "Error fetching all orders",
-			error,
-		});
+		return res
+			.status(500)
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
 	}
 };
 

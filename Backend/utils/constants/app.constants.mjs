@@ -15,4 +15,15 @@ const CONFIG = {
   ALLOWED_FILE_TYPES: ["image/jpeg", "image/png"],
 };
 
-export { REGEX, LIMITS, CONFIG };
+const ORDER = {
+    STATUS: {
+        PENDING: 'pending',
+        SHIPPED: 'delivered',
+        COMPLETED: 'completed',
+        CANCELLED: 'cancelled',
+        values: ['pending', 'delivered', 'completed', 'cancelled']
+    },
+    
+};
+
+export { REGEX, LIMITS, CONFIG, ORDER };
