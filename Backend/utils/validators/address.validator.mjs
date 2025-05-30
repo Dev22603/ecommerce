@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ADDRESS_VALIDATION_ERRORS } from "../constants/constants.mjs";
+import { ADDRESS_VALIDATION_ERRORS } from "../constants/app.messages.mjs";
 
 const addressSchema = Joi.object({
 	// user_id: Joi.number().integer().min(1).required().messages({
