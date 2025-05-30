@@ -67,7 +67,7 @@ const createAddress = async (req, res) => {
 		console.error("Error creating address:", err);
 		res.status(500).json({
 			success: false,
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
@@ -177,7 +177,7 @@ const deleteAddress = async (req, res) => {
 		console.error("Error deleting address:", err);
 		res.status(500).json({
 			success: false,
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
@@ -209,7 +209,7 @@ const setDefaultAddress = async (req, res) => {
 		console.error("Error setting default address:", err);
 		res.status(500).json({
 			success: false,
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
