@@ -17,8 +17,7 @@ export const GET_USER_CART = `
   SELECT c.quantity, p.product_name, p.id AS product_id, p.images, p.sales_price as sales_price, (c.quantity * p.sales_price) AS total_price_per_item
   FROM Carts c
   JOIN Products p ON c.product_id = p.id
-  WHERE p.is_discontinued IS FALSE
-  AND c.user_id = $1;
+  WHERE c.user_id = $1;
 `;
 export const GET_USER_CART_ITEMS = `
   SELECT p.product_name, c.quantity, p.id AS product_id, p.sales_price as sales_price, (c.quantity * p.sales_price) AS total_price_per_item

@@ -3,7 +3,6 @@ import express from "express";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/user.routes.mjs";
 import productRoutes from "./routes/product.routes.mjs"; //Temporary solution
-import adminRoutes from "./routes/admin.user.routes.mjs";
 import cartRoutes from "./routes/cart.routes.mjs";
 import orderRoutes from "./routes/order.routes.mjs";
 import addressRoutes from "./routes/address.routes.mjs";
