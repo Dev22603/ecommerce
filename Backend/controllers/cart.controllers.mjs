@@ -113,7 +113,7 @@ const updateCart = async (req, res) => {
 				console.error("Error removing item from cart:", error);
 				return res.status(500).json({
 					success: false,
-					message: "Error removing item from cart",
+					message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 					error: error.message,
 				});
 			}
