@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { CART_VALIDATION_ERRORS } from "../constants/constants.mjs";
+import { CART_VALIDATION_ERRORS } from "../constants/app.messages.mjs";
 
 const cartUpdateSchema = Joi.object({
   product_id: Joi.number().integer().min(1).required().messages({

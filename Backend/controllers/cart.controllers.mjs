@@ -10,7 +10,7 @@ import {
   CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
 } from "../queries/cart.queries.mjs";
 import { GET_PRODUCT_STOCK } from "../queries/product.queries.mjs";
-import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
+import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/app.messages.mjs";
 
 // Add to Cart inspired by Amazon
 const addItemToCart = async (req, res) => {

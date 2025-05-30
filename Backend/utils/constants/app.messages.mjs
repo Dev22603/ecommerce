@@ -25,6 +25,7 @@ const PRODUCT_VALIDATION_ERRORS = {
 const USER_VALIDATION_ERRORS = {
 	NAME_REQUIRED: "Name is required.",
 	NAME_MIN: "Name must be at least 2 characters.",
+	NAME_MAX: "Name cant exceed 100 characters.",
 
 	EMAIL_REQUIRED: "Email is required.",
 	EMAIL_INVALID: "Email must be a valid email address.",

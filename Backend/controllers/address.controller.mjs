@@ -8,7 +8,7 @@ import {
 	HARD_DELETE_ADDRESS,
 	SET_DEFAULT_ADDRESS,
 } from "../queries/address.queries.mjs";
-import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/constants.mjs";
+import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/app.messages.mjs";
 import { addressSchema } from "../utils/validators/address.validator.mjs";
 
 // CREATE - Add new address
