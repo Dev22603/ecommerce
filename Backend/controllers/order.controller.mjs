@@ -47,18 +47,21 @@ const createOrder = async (req, res) => {
 		}
 
 		// Check stock availability for all items
-		const insufficientStock = cartItems.rows.find(item => item.stock < item.quantity);
+		const insufficientStock = cartItems.rows.find(
+			(item) => item.stock < item.quantity
+		);
 		if (insufficientStock) {
 			await pool.query("ROLLBACK");
-			return res
-				.status(400)
-				.json({ 
-					message: `Insufficient stock for product: ${insufficientStock.product_name}. Available: ${insufficientStock.stock}, Required: ${insufficientStock.quantity}`
-				});
+			return res.status(400).json({
+				message: `Insufficient stock for product: ${insufficientStock.product_name}. Available: ${insufficientStock.stock}, Required: ${insufficientStock.quantity}`,
+			});
 		}
 
 		// Calculate total amount
-		const total_amount = cartItems.rows.reduce((sum, item) => sum + (item.quantity * item.sales_price), 0);
+		const total_amount = cartItems.rows.reduce(
+			(sum, item) => sum + item.quantity * item.sales_price,
+			0
+		);
 
 		// Create the order
 		const orderResult = await pool.query(INSERT_ORDER, [
@@ -69,17 +72,25 @@ const createOrder = async (req, res) => {
 		const order_id = orderResult.rows[0].id;
 
 		// Batch update stock levels
-		const stockUpdates = cartItems.rows.map(item => 
-			`(
+		const stockUpdates = cartItems.rows
+			.map(
+				(item) =>
+					`(
 				UPDATE Products 
 				SET stock = stock - ${item.quantity} 
 				WHERE id = ${item.product_id}
 			)`
-		).join('; ');
+			)
+			.join("; ");
 		await pool.query(`BEGIN; ${stockUpdates}; COMMIT;`);
 
 		// Batch insert order items
-		const orderItems = cartItems.rows.map(item => `(${order_id}, ${item.product_id}, ${item.quantity}, ${item.sales_price})`).join(', ');
+		const orderItems = cartItems.rows
+			.map(
+				(item) =>
+					`(${order_id}, ${item.product_id}, ${item.quantity}, ${item.sales_price})`
+			)
+			.join(", ");
 		await pool.query(`
 			INSERT INTO Order_Items (order_id, product_id, quantity, price)
 			VALUES ${orderItems}
@@ -90,14 +101,14 @@ const createOrder = async (req, res) => {
 		// Commit the transaction
 		await pool.query("COMMIT");
 
-		res.status(201).json({
+		return res.status(201).json({
 			message: ORDER_FEEDBACK_MESSAGES.ORDER_CREATED_SUCCESS,
 			order_id,
 		});
 	} catch (error) {
 		// Rollback the transaction in case of an error
 		await pool.query("ROLLBACK");
-		res.status(500).json({
+		return res.status(500).json({
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error: error.message,
 		});
@@ -325,11 +336,9 @@ const getAllOrders = async (req, res) => {
 
 		// If no orders are found
 		if (result.rows.length === 0) {
-			return res
-				.status(404)
-				.json({
-					message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND_ADMIN,
-				});
+			return res.status(404).json({
+				message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND_ADMIN,
+			});
 		}
 		// const response = result.rows.map(user => ({
 		// 	user_id: user.user_id,
@@ -343,7 +352,6 @@ const getAllOrders = async (req, res) => {
 		// 	}))
 		// }));
 		// TODO: left
-
 
 		// Group orders by user_id and then by order_id, accumulating order items under each order
 		const users = result.rows.reduce((acc, row) => {
