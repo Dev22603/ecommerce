@@ -5,10 +5,14 @@ import { pool } from "../db/db.mjs";
 import { userSchema } from "../utils/validators/user.validator.mjs";
 import {
 	CHECK_USER_EXISTS,
-	GET_USER_BY_ID,
+	GET_USER_BY_EMAIL_ID,
 	GET_USERS,
 	INSERT_USER,
 } from "../queries/user.queries.mjs";
+import {
+	GLOBAL_ERROR_MESSAGES,
+	USER_FEEDBACK_MESSAGES,
+} from "../utils/constants/app.messages.mjs";
 
 // better signup
 const signup = async (req, res) => {
@@ -60,7 +64,7 @@ const signup = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
@@ -71,7 +75,7 @@ const login = async (req, res) => {
 	const password = req.body.password?.trim();
 
 	try {
-		const result = await pool.query(GET_USER_BY_ID, [email]);
+		const result = await pool.query(GET_USER_BY_EMAIL_ID, [email]);
 		const user = result.rows[0];
 		console.log(req.body);
 
@@ -102,14 +106,15 @@ const login = async (req, res) => {
 			}
 		);
 
-		res.status(200).json({
+		return res.status(200).json({
 			token: token,
 			role: user.role,
 			name: user.name,
 		});
 	} catch (err) {
-		res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+		return res.status(500).json({
+			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: err,
 		});
 	}
 };
@@ -121,7 +126,7 @@ const getAllUsers = async (req, res) => {
 		res.status(200).json(users);
 	} catch (err) {
 		res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.INTERNAL_SERVER_ERROR,
+			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
