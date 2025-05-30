@@ -30,7 +30,7 @@ const createOrder = async (req, res) => {
 			"SELECT product_id, quantity FROM Carts WHERE user_id = $1",
 			[user_id]
 		);
-
+//TODO: decrease the product stock
 		if (cartItems.rows.length === 0) {
 			// If the cart is empty, rollback the transaction
 			await pool.query("ROLLBACK");
