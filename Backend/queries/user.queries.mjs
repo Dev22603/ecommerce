@@ -3,7 +3,7 @@ const INSERT_USER = `INSERT INTO Users (name, email, password, role) VALUES ($1,
 
 const CHECK_USER_EXISTS = `SELECT EXISTS(SELECT 1 FROM Users WHERE email = $1) AS "exists"`;
 
-const GET_USER_BY_ID = `SELECT * FROM Users WHERE id = $1`;
+const GET_USER_BY_EMAIL_ID = `SELECT * FROM Users WHERE email = $1`;
 
 const GET_USERS = `SELECT * FROM Users`;
 
@@ -14,7 +14,7 @@ const DELETE_USER = `DELETE FROM Users WHERE id = $1 RETURNING id, name, email, 
 export {
     INSERT_USER,
     CHECK_USER_EXISTS,
-    GET_USER_BY_ID,
+    GET_USER_BY_EMAIL_ID ,
     GET_USERS,
     UPDATE_USER,
     DELETE_USER,
