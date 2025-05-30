@@ -64,7 +64,7 @@ const signup = async (req, res) => {
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };
@@ -111,10 +111,10 @@ const login = async (req, res) => {
 			role: user.role,
 			name: user.name,
 		});
-	} catch (err) {
+	} catch (error) {
 		return res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
-			message: err,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			error: error,
 		});
 	}
 };
@@ -126,7 +126,7 @@ const getAllUsers = async (req, res) => {
 		res.status(200).json(users);
 	} catch (err) {
 		res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
 	}
 };

@@ -13,7 +13,7 @@ const INSERT_PRODUCT = `
 `;
 
 const CHECK_CATEGORY_EXISTS = `
-  SELECT EXISTS(SELECT 1 FROM Categories WHERE id = $1) AS "exists";
+  SELECT EXISTS(SELECT 1 FROM Categories WHERE category_name = $1) AS "exists";
 `;
 
 const SEARCH_PRODUCTS_BY_NAME = `
@@ -69,8 +69,10 @@ const GET_CATEGORIES = `
 
 const DELETE_PRODUCT = `
   DELETE FROM Products
-  WHERE id = $1;
+  WHERE id = $1
+  RETURNING *;
 `;
+
 export {
 	GET_PRODUCTS_PAGINATION,
 	INSERT_CATEGORY,

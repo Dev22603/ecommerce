@@ -10,7 +10,10 @@ import {
 	GET_PRODUCTS_PAGINATION,
 	GET_PRODUCT_BY_ID,
 	DELETE_PRODUCT,
+	GET_CATEGORIES,
+	INSERT_CATEGORY,
 } from "../queries/product.queries.mjs";
+import { validatePagination } from "../utils/common_functions.mjs";
 import {
 	GLOBAL_ERROR_MESSAGES,
 	PRODUCT_FEEDBACK_MESSAGES,
@@ -20,6 +23,8 @@ import { productSchema } from "../utils/validators/product.validator.mjs";
 
 const createProduct = async (req, res) => {
 	try {
+		//TODO: add a check for sales_price<=mrp
+
 		console.log(req.files);
 
 		const parsedBody = {
@@ -112,16 +117,14 @@ const searchProductsByName = async (req, res) => {
 	} catch (err) {
 		return res
 			.status(500)
-			.json({ error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
 	}
 };
 const getProductsByCategory = async (req, res) => {
 	const { category_id } = req.params;
 	console.log(category_id);
 
-	const page = parseInt(req.query.page) || 1;
-	const limit = parseInt(req.query.limit) || 10;
-	const offset = (page - 1) * limit;
+	const { page, limit, offset } = validatePagination(req);
 
 	try {
 		// Fetch products by category_id with pagination
@@ -146,21 +149,22 @@ const getProductsByCategory = async (req, res) => {
 				message: PRODUCT_FEEDBACK_MESSAGES.NO_PRODUCTS_FOUND,
 			}),
 		});
-	} catch (err) {
-		return res
-			.status(500)
-			.json({ error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
-		console.error(err);
+	} catch (error) {
+		return res.status(500).json({
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			error: error,
+		});
 	}
 };
 
 const createCategory = async (req, res) => {
-	const { category_name } = req.body.category_name?.trim().toLowerCase();
+	const category_name = req.body.category_name?.trim().toLowerCase();
+
 	try {
 		const categoryExists = await pool.query(CHECK_CATEGORY_EXISTS, [
 			category_name,
 		]);
-		if (categoryExists.rows[0]) {
+		if (categoryExists.rows[0].exists) {
 			return res.status(200).json({ message: "Category already exists" });
 		}
 		const result = await pool.query(INSERT_CATEGORY, [category_name]);
@@ -169,16 +173,12 @@ const createCategory = async (req, res) => {
 	} catch (err) {
 		return res
 			.status(500)
-			.json({ error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error: err });
 	}
 };
 const getAllProducts = async (req, res) => {
 	try {
-		const page = parseInt(req.query.page) || 1;
-		const limit = parseInt(req.query.limit) || 10;
-
-		const offset = (page - 1) * limit;
-
+		const { page, limit, offset } = validatePagination(req);
 		const result = await pool.query(GET_PRODUCTS_PAGINATION, [
 			limit,
 			offset,
@@ -195,10 +195,11 @@ const getAllProducts = async (req, res) => {
 				message: PRODUCT_FEEDBACK_MESSAGES.NO_PRODUCTS_FOUND,
 			}),
 		});
-	} catch (err) {
-		return res
-			.status(500)
-			.json({ error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
+	} catch (error) {
+		return res.status(500).json({
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			error: error,
+		});
 	}
 };
 
@@ -228,9 +229,9 @@ const getCategories = async (req, res) => {
 	try {
 		const result = await pool.query(GET_CATEGORIES);
 
-		res.status(200).json(result.rows);
+		return res.status(200).json(result.rows);
 	} catch (error) {
-		res.status(500).json({
+		return res.status(500).json({
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error: error,
 		});
@@ -254,12 +255,13 @@ const deleteProduct = async (req, res) => {
 	} catch (err) {
 		return res
 			.status(500)
-			.json({ error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
+			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
 	}
 };
 
 const updateProduct = async (req, res) => {
 	try {
+		//TODO: add a check for sales_price<=mrp
 		const { id } = req.params;
 
 		const parsedBody = {
@@ -366,8 +368,8 @@ const updateProduct = async (req, res) => {
 	} catch (error) {
 		console.error("Error updating product:", error);
 		return res.status(500).json({
-			error: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
-			details: error.message,
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			error: error,
 		});
 	}
 };
