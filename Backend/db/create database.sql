@@ -57,7 +57,7 @@ CREATE TABLE Orders (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL REFERENCES Users(id) ON DELETE CASCADE,
     address_id INTEGER REFERENCES Addresses(id) ON DELETE SET NULL, 
-    status order_status DEFAULT 'Pending',
+    status order_status DEFAULT 'pending',
     total_amount DECIMAL(10, 2),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

@@ -2,12 +2,11 @@
 import { pool } from "../db/db.mjs";
 import {
 	ADD_TO_CART,
-	GET_CART_TOTAL_BY_USER,
 	GET_USER_CART,
 	UPDATE_CART_ITEM_BY_USER_AND_PRODUCT,
 	DELETE_CART_ITEM_BY_USER_AND_PRODUCT,
 	GET_PRODUCT_NAME,
-	CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
+	CLEAR_CART_BY_USER,
 } from "../queries/cart.queries.mjs";
 import { GET_PRODUCT_STOCK } from "../queries/product.queries.mjs";
 import { GLOBAL_ERROR_MESSAGES } from "../utils/constants/app.messages.mjs";
@@ -44,18 +43,35 @@ const addItemToCart = async (req, res) => {
 
 const getCart = async (req, res) => {
 	const user_id = req.user.id; // assuming you have user info from JWT token
-	console.log(user_id);
 
 	try {
 		const cart = await pool.query(GET_USER_CART, [user_id]);
-		const grandTotal = await pool.query(GET_CART_TOTAL_BY_USER, [user_id]);
-		res.status(200).json({
+
+		// this is less efficient
+		// const total_amount = cart.rows.reduce(
+		// 	(sum, item) => sum + item.total_price_per_item,
+		// 	0
+		// );
+		// const total_quantity = cart.rows.reduce(
+		// 	(sum, item) => sum + item.quantity,
+		// 	0
+		// );
+
+		const { total_amount, total_quantity } = cart.rows.reduce(
+			(accum, item) => ({
+				total_amount: accum.total_amount + item.total_price_per_item,
+				total_quantity: accum.total_quantity + item.quantity,
+			}),
+			{ total_amount: 0, total_quantity: 0 }
+		);
+		return res.status(200).json({
 			items: cart.rows,
-			total_amount: cart.rows[0].total_amount,
-			total_quantity: grandTotal.rows[0].total_quantity,
+			total_amount,
+			total_quantity,
 		});
 	} catch (error) {
-		res.status(500).json({
+		console.log(error);
+		return res.status(500).json({
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error,
 		});
@@ -173,6 +189,16 @@ const removeItemFromCart = async (req, res) => {
 	const user_id = req.user.id;
 
 	try {
+		if (isNaN(product_id)) {
+			return res.status(400).json({
+				error: "product_id is an integer",
+			});
+		}
+		if (isNaN(user_id)) {
+			return res.status(400).json({
+				error: "user_id is an integer",
+			});
+		}
 		// Delete the product from the cart
 		const deleteResult = await pool.query(
 			DELETE_CART_ITEM_BY_USER_AND_PRODUCT,
@@ -194,13 +220,12 @@ const removeItemFromCart = async (req, res) => {
 		);
 
 		// Return a successful response with the product name
-		res.status(200).json({
+		return res.status(200).json({
 			message: `${productResult.rows[0].product_name} has been removed from your cart.`,
-			product_id: parseInt(product_id, 10),
 		});
 	} catch (error) {
-		res.status(500).json({
-			message: "Error removing item from cart",
+		return res.status(500).json({
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error,
 		});
 	}
@@ -209,57 +234,21 @@ const removeItemFromCart = async (req, res) => {
 // Clear all items from the user's cart
 const clearCart = async (req, res) => {
 	const user_id = req.user.id;
-
 	try {
+		if (isNaN(user_id)) {
+			return res.status(400).json({
+				error: "user_id is an integer",
+			});
+		}
 		await pool.query(CLEAR_CART_BY_USER, [user_id]);
-		res.status(200).json({ message: "Cart has been cleared." });
+		return res.status(200).json({ message: "Cart has been cleared." });
 	} catch (error) {
-		res.status(500).json({
+		console.log(error);
+		return res.status(500).json({
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 			error,
 		});
 	}
 };
 
-// Check if a specific product is in the user's cart and return the quantity
-const checkCartItemQuantity = async (req, res) => {
-	const { product_id } = req.body; // Get product_id from request body
-	const user_id = req.user.id;
-	console.log(user_id);
-
-	try {
-		const result = await pool.query(
-			CHECK_CART_ITEM_QUANTITY_BY_USER_AND_PRODUCT,
-			[user_id, product_id]
-		);
-
-		if (result.rows.length > 0) {
-			const product = result.rows[0];
-			res.status(200).json({
-				message: "Product found in your cart.",
-				product: product.product_name,
-				quantity: product.quantity,
-			});
-		} else {
-			res.status(201).json({
-				message: "Product not found in your cart.",
-				product: product.product_name,
-				quantity: 0,
-			});
-		}
-	} catch (error) {
-		res.status(500).json({
-			message: "Error checking cart item quantity.",
-			error: error,
-		});
-	}
-};
-
-export {
-	getCart,
-	updateCart,
-	removeItemFromCart,
-	addItemToCart,
-	clearCart,
-	checkCartItemQuantity,
-};
+export { getCart, updateCart, removeItemFromCart, addItemToCart, clearCart };
