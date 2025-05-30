@@ -89,8 +89,29 @@ const CART_VALIDATION_ERRORS = {
   QUANTITY_MIN: "Quantity must be a non-negative number",
 };
 
+const ORDER_VALIDATION_ERRORS = {
+  USER_ID_REQUIRED: "User ID is required.",
+  USER_ID_INVALID: "User ID must be a valid number.",
+  USER_ID_MIN: "User ID must be at least 1.",
+
+  ADDRESS_ID_REQUIRED: "Address ID is required.",
+  ADDRESS_ID_INVALID: "Address ID must be a valid number.",
+  ADDRESS_ID_MIN: "Address ID must be at least 1.",
+  CART_EMPTY: "Cart is empty. Cannot create an order.",
+};
+
+const ORDER_FEEDBACK_MESSAGES = {
+  ORDER_CREATED_SUCCESS: "Order created successfully",
+  NO_ORDERS_FOUND: "No orders found.",
+  ORDER_CANCELLED_SUCCESS: "Order cancelled successfully",
+  ORDER_NOT_FOUND: "Order not found.",
+  NO_ORDERS_FOUND_ADMIN: "No orders found.",
+};
+
 export {
   PRODUCT_VALIDATION_ERRORS,
+  ORDER_VALIDATION_ERRORS,
+  ORDER_FEEDBACK_MESSAGES,  
   PRODUCT_FEEDBACK_MESSAGES,
   GLOBAL_ERROR_MESSAGES,
   ADDRESS_VALIDATION_ERRORS,
