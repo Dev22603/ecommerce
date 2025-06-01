@@ -17,7 +17,7 @@ router.post("/create", authenticate, createOrder);
 router.get("/", authenticate, getUserOrders);
 // router.get("/filter", authenticate, searchOrdersByDate);
 router.get("/:order_id", authenticate, getOrderDetails);
-router.delete("/:order_id", authenticate, cancelOrder);
+router.put("/:order_id", authenticate, cancelOrder);
 router.patch(
     "/:order_id/status",
     authenticate,

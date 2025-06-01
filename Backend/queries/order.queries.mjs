@@ -13,7 +13,8 @@ const GET_USER_ORDERS = `
                 'product_id', oi.product_id,
                 'product_name', p.product_name,
                 'quantity', oi.quantity,
-                'sales_price', oi.price::float8
+                'sales_price', oi.price::float8,
+                'total_price', (oi.quantity * oi.price)::float8
             )
         ) FILTER (WHERE oi.product_id IS NOT NULL) AS order_items
     FROM Orders o
@@ -57,7 +58,8 @@ SELECT
             'product_id', oi.product_id,
             'product_name', p.product_name,
             'quantity', oi.quantity,
-            'sales_price', oi.price::float8
+            'sales_price', oi.price::float8,
+            'total_price', (oi.quantity * oi.price)::float8
         )
     ) FILTER (WHERE oi.product_id IS NOT NULL) AS order_items
 FROM Orders o
@@ -72,7 +74,7 @@ SELECT status FROM Orders WHERE id = $1;
 `;
 
 const UPDATE_ORDER_STATUS = `
-UPDATE Orders SET status = $1 WHERE id = $2;
+UPDATE Orders SET status = $1 WHERE id = $2 RETURNING *;
 `;
 const GET_ALL_ORDERS = `
 SELECT 
@@ -90,7 +92,8 @@ SELECT
                         'product_id', oi.product_id,
                         'product_name', p.product_name,
                         'quantity', oi.quantity,
-                        'sales_price', oi.price::float8
+                        'sales_price', oi.price::float8,
+                        'total_price', (oi.quantity * oi.price)::float8
                     )
                 ) FILTER (WHERE oi.product_id IS NOT NULL)
                 FROM Order_Items oi
@@ -100,10 +103,13 @@ SELECT
         )
     ) FILTER (WHERE o.id IS NOT NULL) AS orders
 FROM Users u
-LEFT JOIN Orders o ON u.id = o.user_id
+INNER JOIN Orders o ON u.id = o.user_id
 GROUP BY u.id, u.name
-ORDER BY u.name;
+ORDER BY u.name
+LIMIT $1 OFFSET $2;
 `;
+
+// LEFT JOIN Orders o ON u.id = o.user_id doesnt work in this case
 const GET_ALL_ORDERS_WITH_ITEMS = `
 SELECT o.id AS order_id, o.user_id, o.total_amount, o.created_at, 
                     u.name AS user_name, o.status,
