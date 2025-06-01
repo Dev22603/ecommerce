@@ -12,6 +12,7 @@ import {
 	GET_ORDER_STATUS,
 	GET_ALL_ORDERS_WITH_ITEMS,
 	GET_ALL_ORDERS_COUNT,
+	GET_ALL_ORDERS,
 } from "../queries/order.queries.mjs";
 import {
 	ORDER_VALIDATION_ERRORS,
@@ -20,13 +21,28 @@ import {
 } from "../utils/constants/app.messages.mjs";
 import { validatePagination, formatDate } from "../utils/common_functions.mjs";
 import { ORDER } from "../utils/constants/app.constants.mjs";
+import { GET_USER_ID_BY_ADDRESS_ID } from "../queries/address.queries.mjs";
 // Create order from cart
 const createOrder = async (req, res) => {
 	const user_id = req.user.id; // assuming you have user info from JWT token
 	const { address_id } = req.body;
 	if (!address_id) {
-		//get the default address
-		//TODO: complete the get default address
+		return res
+			.status(400)
+			.json({ message: ORDER_VALIDATION_ERRORS.ADDRESS_ID_REQUIRED });
+	}
+	const address_user_id = await pool.query(GET_USER_ID_BY_ADDRESS_ID, [
+		address_id,
+	]);
+	if (address_user_id.rows.length === 0) {
+		return res
+			.status(404)
+			.json({ message: ORDER_VALIDATION_ERRORS.ADDRESS_ID_NOT_FOUND });
+	}
+	if (address_user_id.rows[0].user_id !== user_id) {
+		return res
+			.status(403)
+			.json({ message: ORDER_VALIDATION_ERRORS.ADDRESS_ID_NOT_FOUND });
 	}
 	try {
 		// Start a transaction
@@ -69,31 +85,17 @@ const createOrder = async (req, res) => {
 		const order_id = orderResult.rows[0].id;
 
 		// Batch update stock levels
-		// Prepare stock update queries with parameters
-		const stockUpdates = cartItems.rows.map((item, index) => {
-			return `
+		for (let i = 0; i < cartItems.rows.length; i++) {
+			const item = cartItems.rows[i];
+			await pool.query(
+				`
 				UPDATE Products 
-				SET stock = GREATEST(0, stock - $${index * 2 + 1}) 
-				WHERE id = $${index * 2 + 2}
-				AND stock >= $${index * 2 + 1}
-			`;
-		});
-
-		// Create parameter array
-		const params = cartItems.rows.flatMap((item) => [
-			item.quantity,
-			item.product_id,
-		]);
-
-		// Execute all updates in a single transaction
-		await pool.query(
-			`
-			BEGIN;
-			${stockUpdates.join(";\n")};
-			COMMIT;
-		`,
-			params
-		);
+				SET stock = GREATEST(0, stock - $1) 
+				WHERE id = $2 AND stock >= $1
+				`,
+				[item.quantity, item.product_id]
+			);
+		}
 
 		// Batch insert order items
 		const orderItems = cartItems.rows
@@ -296,6 +298,8 @@ const cancelOrder = async (req, res) => {
 const updateOrderStatus = async (req, res) => {
 	const { order_id } = req.params;
 	const { status } = req.body;
+	console.log(order_id);
+	console.log(status);
 
 	// Check if the provided status is valid
 	if (!ORDER.STATUS.values.includes(status)) {
@@ -333,10 +337,12 @@ const getAllOrders = async (req, res) => {
 	const { page, limit, offset } = validatePagination(req);
 
 	try {
-		const result = await pool.query(GET_ALL_ORDERS_WITH_ITEMS, [
-			limit,
-			offset,
-		]);
+		const result = await pool.query(GET_ALL_ORDERS, [limit, offset]);
+		// OLD
+		// const result = await pool.query(GET_ALL_ORDERS_WITH_ITEMS, [
+		// 	limit,
+		// 	offset,
+		// ]);
 
 		// Query to fetch total number of orders for pagination
 		const totalCountResult = await pool.query(GET_ALL_ORDERS_COUNT);
@@ -351,83 +357,91 @@ const getAllOrders = async (req, res) => {
 				message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND_ADMIN,
 			});
 		}
-		// const response = result.rows.map(user => ({
-		// 	user_id: user.user_id,
-		// 	user_name: user.user_name,
-		// 	orders: user.orders.map(order => ({
-		// 		order_id: order.order_id,
-		// 		total_amount: order.total_amount,
-		// 		created_at: order.created_at,
-		// 		status: order.status,
-		// 		order_items: order.order_items || []
-		// 	}))
-		// }));
-		// TODO: left
+		// NEW
+		const users = result.rows.map((user) => ({
+			user_id: user.user_id,
+			user_name: user.user_name,
+			orders: user.orders?.map((order) => ({
+				order_id: order.order_id,
+				total_amount: order.total_amount,
+				created_at: order.created_at,
+				status: order.status,
+				order_items: order.order_items || [],
+			})),
+		}));
+		console.log(users);
 
-		// Group orders by user_id and then by order_id, accumulating order items under each order
-		const users = result.rows.reduce((acc, row) => {
-			// If the user already exists, we check for the order and add the item to it
-			const existingUser = acc.find(
-				(user) => user.user_id === row.user_id
-			);
-			if (existingUser) {
-				// If the order already exists, add the item to its order_items
-				const existingOrder = existingUser.orders.find(
-					(order) => order.order_id === row.order_id
-				);
-				if (existingOrder) {
-					existingOrder.order_items.push({
-						product_id: row.product_id,
-						product_name: row.product_name,
-						quantity: row.quantity,
-						sales_price: parseFloat(row.item_price),
-					});
-				} else {
-					// If the order does not exist, create a new order and add the item
-					existingUser.orders.push({
-						order_id: row.order_id,
-						total_amount: parseFloat(row.total_amount),
-						created_at: new Date(row.created_at).toLocaleDateString(
-							"en-GB"
-						),
-						status: row.status,
-						order_items: [
-							{
-								product_id: row.product_id,
-								product_name: row.product_name,
-								quantity: row.quantity,
-								sales_price: parseFloat(row.item_price),
-							},
-						],
-					});
-				}
-			} else {
-				// If the user doesn't exist, create a new user entry
-				acc.push({
-					user_id: row.user_id,
-					user_name: row.user_name,
-					orders: [
-						{
-							order_id: row.order_id,
-							total_amount: parseFloat(row.total_amount),
-							created_at: new Date(
-								row.created_at
-							).toLocaleDateString("en-GB"),
-							status: row.status,
-							order_items: [
-								{
-									product_id: row.product_id,
-									product_name: row.product_name,
-									quantity: row.quantity,
-									sales_price: parseFloat(row.item_price),
-								},
-							],
-						},
-					],
-				});
-			}
-			return acc;
-		}, []);
+		// OLD
+		// // Group orders by user_id and then by order_id, accumulating order items under each order
+		// const users = result.rows.reduce((acc, row) => {
+		// 	// If the user already exists, we check for the order and add the item to it
+		// 	const existingUser = acc.find(
+		// 		(user) => user.user_id === row.user_id
+		// 	);
+		// 	if (existingUser) {
+		// 		// If the order already exists, add the item to its order_items
+		// 		const existingOrder = existingUser.orders.find(
+		// 			(order) => order.order_id === row.order_id
+		// 		);
+		// 		if (existingOrder) {
+		// 			existingOrder.order_items.push({
+		// 				product_id: row.product_id,
+		// 				product_name: row.product_name,
+		// 				quantity: row.quantity,
+		// 				sales_price: parseFloat(row.item_price),
+		// 				total_price: parseFloat(row.item_price) * row.quantity,
+		// 			});
+		// 		} else {
+		// 			// If the order does not exist, create a new order and add the item
+		// 			existingUser.orders.push({
+		// 				order_id: row.order_id,
+		// 				total_amount: parseFloat(row.total_amount),
+		// 				created_at: new Date(row.created_at).toLocaleDateString(
+		// 					"en-GB"
+		// 				),
+		// 				status: row.status,
+		// 				order_items: [
+		// 					{
+		// 						product_id: row.product_id,
+		// 						product_name: row.product_name,
+		// 						quantity: row.quantity,
+		// 						sales_price: parseFloat(row.item_price),
+		// 						total_price:
+		// 							parseFloat(row.item_price) * row.quantity,
+		// 					},
+		// 				],
+		// 			});
+		// 		}
+		// 	} else {
+		// 		// If the user doesn't exist, create a new user entry
+		// 		acc.push({
+		// 			user_id: row.user_id,
+		// 			user_name: row.user_name,
+		// 			orders: [
+		// 				{
+		// 					order_id: row.order_id,
+		// 					total_amount: parseFloat(row.total_amount),
+		// 					created_at: new Date(
+		// 						row.created_at
+		// 					).toLocaleDateString("en-GB"),
+		// 					status: row.status,
+		// 					order_items: [
+		// 						{
+		// 							product_id: row.product_id,
+		// 							product_name: row.product_name,
+		// 							quantity: row.quantity,
+		// 							sales_price: parseFloat(row.item_price),
+		// 							total_price:
+		// 								parseFloat(row.item_price) *
+		// 								row.quantity,
+		// 						},
+		// 					],
+		// 				},
+		// 			],
+		// 		});
+		// 	}
+		// 	return acc;
+		// }, []);
 
 		// Respond with the paginated orders grouped by user_id
 		return res.status(200).json({
@@ -438,9 +452,10 @@ const getAllOrders = async (req, res) => {
 			users: users,
 		});
 	} catch (error) {
-		return res
-			.status(500)
-			.json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
+		return res.status(500).json({
+			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
+			error: error.message,
+		});
 	}
 };
 

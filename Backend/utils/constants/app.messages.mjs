@@ -93,10 +93,12 @@ const ORDER_VALIDATION_ERRORS = {
 	USER_ID_REQUIRED: "User ID is required.",
 	USER_ID_INVALID: "User ID must be a valid number.",
 	USER_ID_MIN: "User ID must be at least 1.",
+	USER_ID_NOT_FOUND: "User not found.",
 
 	ADDRESS_ID_REQUIRED: "Address ID is required.",
 	ADDRESS_ID_INVALID: "Address ID must be a valid number.",
 	ADDRESS_ID_MIN: "Address ID must be at least 1.",
+	ADDRESS_ID_NOT_FOUND: "Address not found.",
 	CART_EMPTY: "Cart is empty. Cannot create an order.",
 };
 
