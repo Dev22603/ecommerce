@@ -2,10 +2,10 @@
 import express from "express";
 import bodyParser from "body-parser";
 import authRoutes from "./routes/user.routes.mjs";
-import productRoutes from "./routes/product.routes.mjs";
-import adminRoutes from "./routes/admin.user.routes.mjs";
+import productRoutes from "./routes/product.routes.mjs"; //Temporary solution
 import cartRoutes from "./routes/cart.routes.mjs";
 import orderRoutes from "./routes/order.routes.mjs";
+import addressRoutes from "./routes/address.routes.mjs";
 import cors from "cors";
 import path from "path";
 
@@ -18,17 +18,17 @@ app.use(
     })
 );
 // Middleware
-app.use(bodyParser.json());
-// app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("uploads"));
 
 // Routes
-app.use("/api/auth", authRoutes);
+app.use("/api", authRoutes);
 app.use("/api/products", productRoutes);
-app.use("/api/admin", adminRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/address", addressRoutes);
 
 // Serve static files from uploads folder
 const uploadsDir = path.resolve("uploads"); // Resolve the absolute path
