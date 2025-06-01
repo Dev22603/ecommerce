@@ -1,0 +1,104 @@
+Folder structure of D:\Medkart\E-Commerce:
+.gitignore
+a.txt
+Backend
+  .env
+  app.mjs
+  config
+    config.json
+  controllers
+    cart.controllers.mjs
+    order.controller.mjs
+    product.controller.mjs
+    user.controllers.mjs
+  controllers pg-pool
+    cart.controllers.mjs
+    order.controller.mjs
+    product.controller.mjs
+    user.controllers.mjs
+  db
+    database.sql
+    databaseEntry.sql
+    db.mjs
+  index.mjs
+  middlewares
+    auth.mjs
+  migrations
+    20250122153249-create-users.mjs
+    20250122153303-create-categories.mjs
+    20250122155201-create-products.mjs
+    20250122155204-create-carts.mjs
+    20250122155207-create-orders.mjs
+    20250122155210-create-order-items.mjs
+  models
+    cart.mjs
+    category.mjs
+    index.mjs
+    order.mjs
+    orderItem.mjs
+    product.mjs
+    user.mjs
+  package-lock.json
+  package.json
+  photos
+    script to download images.py
+  routes
+    admin.user.routes.mjs
+    cart.routes.mjs
+    order.routes.mjs
+    product.routes.mjs
+    user.routes.mjs
+  seeders
+  uploads
+    1737332321206-shopping.webp
+    1737332455409-shopping.webp
+    1737380435763-binoculars.webp
+ecommerce.postman_collection.json
+ER Diagram Code.txt
+Frontend
+  .gitignore
+  dir.txt
+  eslint.config.js
+  index.html
+  package-lock.json
+  package.json
+  postcss.config.js
+  README.md
+  router
+    AppRouter.jsx
+    ProtectedRoute.jsx
+  src
+    App.jsx
+    assets
+    components
+      Navbar.jsx
+      ProductCard.jsx
+      ProductForm.jsx
+      ProductTable.jsx
+      ProtectedRoute.jsx
+    context
+      AuthContext.jsx
+      CartContext.jsx
+    index.css
+    main.jsx
+    pages
+      AdminDashboard.jsx
+      AllOrders.jsx
+      Cart.jsx
+      Home.jsx
+      Login.jsx
+      MyOrders.jsx
+      OrderSummary.jsx
+      Signup.jsx
+    schemas
+      loginSchema.jsx
+      signupSchema.jsx
+    services
+      adminService.js
+      authService.js
+      cartService.js
+      ordersService.js
+      productService.js
+  tailwind.config.js
+  vite.config.js
+README.md
