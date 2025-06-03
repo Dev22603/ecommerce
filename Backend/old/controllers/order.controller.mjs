@@ -35,10 +35,11 @@ const createOrder = async (req, res) => {
 			// If the cart is empty, rollback the transaction
 			await pool.query("ROLLBACK");
 			return res
-				.status(400)
-				.json({ message: "Cart is empty. Cannot create an order." });
+			.status(400)
+			.json({ message: "Cart is empty. Cannot create an order." });
 		}
-
+		//TODO: decrease the product stock
+		
 		// Insert items into Order_Items
 		for (const item of cartItems.rows) {
 			const priceResult = await pool.query(
