@@ -25,7 +25,6 @@ const createProduct = async (req, res) => {
 	try {
 		//TODO: add a check for sales_price<=mrp
 
-		console.log(req.files);
 
 		const parsedBody = {
 			product_name: req.body.product_name?.trim(),
@@ -62,6 +61,11 @@ const createProduct = async (req, res) => {
 			return res
 				.status(400)
 				.json({ message: PRODUCT_VALIDATION_ERRORS.IMAGE_REQUIRED });
+		}
+		if(parsedBody.sales_price>parsedBody.mrp){
+			return res.status(400).json({
+				message: PRODUCT_VALIDATION_ERRORS.SALES_PRICE_GREATER_THAN_MRP,
+			});
 		}
 
 		const result = await pool.query(INSERT_PRODUCT, [

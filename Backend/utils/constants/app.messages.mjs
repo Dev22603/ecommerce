@@ -5,6 +5,7 @@ const PRODUCT_VALIDATION_ERRORS = {
 	SALES_PRICE_REQUIRED: "Sales Price is required.",
 	SALES_PRICE_INVALID: "Sales price must be a valid number",
 	SALES_PRICE_MIN: "Sales price must be greater than 0",
+	SALES_PRICE_GREATER_THAN_MRP: "Sales price must be less than or equal to MRP",
 
 	MRP_REQUIRED: "MRP is required.",
 	MRP_INVALID: "MRP must be a valid number",
