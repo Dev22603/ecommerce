@@ -25,7 +25,7 @@ const createAddress = async (req, res) => {
 			state,
 			address_type = "Home",
 		} = req.body;
-		const user_id = req.user.id; // assuming you have user info from JWT token
+		const user_id = req.user.id;
 
 		const parsedBody = {
 			full_name: full_name?.trim(),
@@ -62,10 +62,10 @@ const createAddress = async (req, res) => {
 			address_type,
 		]);
 
-		res.status(201).json({ success: true, address: rows[0] });
+		return res.status(201).json({ success: true, address: rows[0] });
 	} catch (err) {
 		console.error("Error creating address:", err);
-		res.status(500).json({
+		return res.status(500).json({
 			success: false,
 			message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR,
 		});
