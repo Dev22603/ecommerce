@@ -1,297 +1,359 @@
-// // Frontend\src\components\ProductForm.jsx
 import React, { useState, useEffect } from "react";
-import { toast } from "react-toastify";
+import {
+  HiOutlineX,
+  HiOutlinePhotograph,
+  HiOutlinePlus,
+  HiOutlineTrash,
+} from "react-icons/hi";
 
-const ProductForm = ({ initialProduct, onSubmit, onCancel }) => {
-    const [productName, setProductName] = useState("");
-    const [wsCode, setWsCode] = useState("");
-    const [salesPrice, setSalesPrice] = useState("");
-    const [mrp, setMrp] = useState("");
-    const [packageSize, setPackageSize] = useState("");
-    const [tags, setTags] = useState("");
-    const [categoryId, setCategoryId] = useState("");
-    const [stock, setStock] = useState(0);
-    const [images, setImages] = useState([]);
-    const [previewImages, setPreviewImages] = useState([]);
-    const [existingImages, setExistingImages] = useState([]);
+const ProductForm = ({ initialProduct, onSubmit, onCancel, isOpen }) => {
+  const [productName, setProductName] = useState("");
+  const [wsCode, setWsCode] = useState("");
+  const [salesPrice, setSalesPrice] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [packageSize, setPackageSize] = useState("");
+  const [tags, setTags] = useState("");
+  const [categoryId, setCategoryId] = useState("");
+  const [stock, setStock] = useState(0);
+  const [images, setImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-    // Populate the form with initialProduct data
-    useEffect(() => {
-        if (initialProduct) {
-            setProductName(initialProduct.product_name || "");
-            setWsCode(initialProduct.ws_code || "");
-            setSalesPrice(initialProduct.sales_price || "");
-            setMrp(initialProduct.mrp || "");
-            setPackageSize(initialProduct.package_size || "");
-            setTags((initialProduct.tags || []).join(", "));
-            setCategoryId(initialProduct.category_id || "");
-            setStock(initialProduct.stock || 0);
-            setExistingImages(initialProduct.images || []);
-        }
-    }, [initialProduct]);
+  // Populate the form with initialProduct data
+  useEffect(() => {
+    if (initialProduct) {
+      setProductName(initialProduct.product_name || "");
+      setWsCode(initialProduct.ws_code || "");
+      setSalesPrice(initialProduct.sales_price || "");
+      setMrp(initialProduct.mrp || "");
+      setPackageSize(initialProduct.package_size || "");
+      setTags(Array.isArray(initialProduct.tags) ? initialProduct.tags.join(", ") : initialProduct.tags || "");
+      setCategoryId(initialProduct.category_id || "");
+      setStock(initialProduct.stock || 0);
+      setExistingImages(initialProduct.images || []);
+    } else {
+      // Reset form for new product
+      setProductName("");
+      setWsCode("");
+      setSalesPrice("");
+      setMrp("");
+      setPackageSize("");
+      setTags("");
+      setCategoryId("");
+      setStock(0);
+      setImages([]);
+      setPreviewImages([]);
+      setExistingImages([]);
+    }
+  }, [initialProduct]);
 
-    const handleFileChange = (e) => {
-        const files = Array.from(e.target.files);
-        const validFiles = files.filter((file) =>
-            ["image/png", "image/jpeg", "image/webp"].includes(file.type)
-        );
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    const validFiles = files.filter((file) =>
+      ["image/png", "image/jpeg", "image/webp"].includes(file.type)
+    );
 
-        if (validFiles.length !== files.length) {
-            alert("Only .png, .jpeg, and .webp files are allowed!");
-            return;
-        }
+    if (validFiles.length !== files.length) {
+      alert("Only .png, .jpeg, and .webp files are allowed!");
+      return;
+    }
 
-        setImages(validFiles);
+    setImages(validFiles);
+    const previews = validFiles.map((file) => URL.createObjectURL(file));
+    setPreviewImages(previews);
+  };
 
-        // Generate previews for the new images
-        const previews = validFiles.map((file) => URL.createObjectURL(file));
-        setPreviewImages(previews);
-    };
+  const handleRemoveExistingImage = (url) => {
+    setExistingImages(existingImages.filter((image) => image !== url));
+  };
 
-    const handleRemoveExistingImage = (url) => {
-        setExistingImages(existingImages.filter((image) => image !== url));
-    };
+  const handleRemoveNewImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
+    setPreviewImages(previewImages.filter((_, i) => i !== index));
+  };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-        if (
-            !productName ||
-            !wsCode ||
-            !salesPrice ||
-            !mrp ||
-            !packageSize ||
-            !categoryId
-        ) {
-            alert("Please fill in all required fields.");
-            return;
-        }
+    if (
+      !productName ||
+      !wsCode ||
+      !salesPrice ||
+      !mrp ||
+      !packageSize ||
+      !categoryId
+    ) {
+      alert("Please fill in all required fields.");
+      return;
+    }
 
-        const formData = new FormData();
-        formData.append("product_name", productName);
-        formData.append("ws_code", wsCode);
-        formData.append("sales_price", salesPrice);
-        formData.append("mrp", mrp);
-        formData.append("package_size", packageSize);
-        formData.append("tags", tags);
-        formData.append("category_id", categoryId);
-        formData.append("stock", stock);
+    setLoading(true);
 
-        // Append new images
-        images.forEach((image) => {
-            formData.append("images", image);
-        });
+    const formData = new FormData();
+    formData.append("product_name", productName);
+    formData.append("ws_code", wsCode);
+    formData.append("sales_price", salesPrice);
+    formData.append("mrp", mrp);
+    formData.append("package_size", packageSize);
+    formData.append("tags", tags);
+    formData.append("category_id", categoryId);
+    formData.append("stock", stock);
 
-        // Append existing images
-        console.log(existingImages);
+    images.forEach((image) => {
+      formData.append("images", image);
+    });
 
-        formData.append("existingImages", JSON.stringify(existingImages));
+    formData.append("existingImages", JSON.stringify(existingImages));
 
-        onSubmit(formData);
-    };
+    try {
+      await onSubmit(formData);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <form
-            onSubmit={handleSubmit}
-            className="max-w-3xl mx-auto bg-white p-6 shadow-md rounded-lg space-y-6"
-            encType="multipart/form-data"
-        >
-            {/* Form Fields */}
-            <h2 className="text-xl font-semibold text-center">Product Form</h2>
-            <div className="grid grid-cols-2 gap-6">
-                {/* Left Column */}
-                <div className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="productName"
-                            className="block font-medium"
-                        >
-                            Product Name
-                        </label>
-                        <input
-                            id="productName"
-                            type="text"
-                            value={productName}
-                            onChange={(e) => setProductName(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="wsCode" className="block font-medium">
-                            WS Code
-                        </label>
-                        <input
-                            id="wsCode"
-                            type="number"
-                            value={wsCode}
-                            onChange={(e) => setWsCode(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="salesPrice"
-                            className="block font-medium"
-                        >
-                            Sales Price (₹)
-                        </label>
-                        <input
-                            id="salesPrice"
-                            type="number"
-                            value={salesPrice}
-                            onChange={(e) => setSalesPrice(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="mrp" className="block font-medium">
-                            MRP (₹)
-                        </label>
-                        <input
-                            id="mrp"
-                            type="number"
-                            value={mrp}
-                            onChange={(e) => setMrp(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                </div>
+  if (!isOpen) return null;
 
-                {/* Right Column */}
-                <div className="space-y-4">
-                    <div>
-                        <label
-                            htmlFor="packageSize"
-                            className="block font-medium"
-                        >
-                            Package Size
-                        </label>
-                        <input
-                            id="packageSize"
-                            type="number"
-                            value={packageSize}
-                            onChange={(e) => setPackageSize(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="tags" className="block font-medium">
-                            Tags (comma-separated)
-                        </label>
-                        <input
-                            id="tags"
-                            type="text"
-                            value={tags}
-                            onChange={(e) => setTags(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                    <div>
-                        <label
-                            htmlFor="categoryId"
-                            className="block font-medium"
-                        >
-                            Category ID
-                        </label>
-                        <input
-                            id="categoryId"
-                            type="number"
-                            value={categoryId}
-                            onChange={(e) => setCategoryId(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                            required
-                        />
-                    </div>
-                    <div>
-                        <label htmlFor="stock" className="block font-medium">
-                            Stock
-                        </label>
-                        <input
-                            id="stock"
-                            type="number"
-                            value={stock}
-                            onChange={(e) => setStock(e.target.value)}
-                            className="w-full border rounded px-3 py-2"
-                        />
-                    </div>
-                </div>
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Overlay */}
+      <div
+        className="absolute inset-0 bg-nexus-900/80 backdrop-blur-sm"
+        onClick={onCancel}
+      />
+
+      {/* Modal */}
+      <div className="relative bg-nexus-800 border border-nexus-600 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden animate-scale-in">
+        {/* Header */}
+        <div className="flex items-center justify-between p-6 border-b border-nexus-600">
+          <h2 className="font-heading text-xl font-bold text-nexus-50">
+            {initialProduct ? "Edit Product" : "Add New Product"}
+          </h2>
+          <button
+            onClick={onCancel}
+            className="p-2 text-nexus-400 hover:text-nexus-100 hover:bg-nexus-700 rounded-lg transition-colors"
+          >
+            <HiOutlineX className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="overflow-y-auto max-h-[calc(90vh-140px)]">
+          <div className="p-6 space-y-6">
+            {/* Basic Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="input-label">Product Name *</label>
+                <input
+                  type="text"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  className="input"
+                  placeholder="Enter product name"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="input-label">WS Code *</label>
+                <input
+                  type="number"
+                  value={wsCode}
+                  onChange={(e) => setWsCode(e.target.value)}
+                  className="input"
+                  placeholder="e.g., 12345"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="input-label">Category ID *</label>
+                <input
+                  type="number"
+                  value={categoryId}
+                  onChange={(e) => setCategoryId(e.target.value)}
+                  className="input"
+                  placeholder="e.g., 1"
+                  required
+                />
+              </div>
             </div>
 
-            {/* Existing Image Previews */}
-            {existingImages.length > 0 && (
-                <div>
-                    <h3 className="font-medium">Existing Images</h3>
-                    <div className="flex flex-wrap gap-4">
-                        {existingImages.map((url, index) => (
-                            <div key={index} className="relative">
-                                <img
-                                    src={url}
-                                    alt={`Existing ${index + 1}`}
-                                    className="w-20 h-20 object-cover border rounded"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        handleRemoveExistingImage(url)
-                                    }
-                                    className="absolute top-0 right-0 bg-red-500 text-white rounded-full px-2 py-1 text-xs"
-                                >
-                                    X
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* New Image Upload */}
+            {/* Pricing */}
             <div>
-                <label htmlFor="images" className="block font-medium">
-                    Upload New Images
-                </label>
+              <h3 className="text-sm font-medium text-nexus-200 mb-3">Pricing</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="input-label">Sales Price (₹) *</label>
+                  <input
+                    type="number"
+                    value={salesPrice}
+                    onChange={(e) => setSalesPrice(e.target.value)}
+                    className="input"
+                    placeholder="e.g., 999"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="input-label">MRP (₹) *</label>
+                  <input
+                    type="number"
+                    value={mrp}
+                    onChange={(e) => setMrp(e.target.value)}
+                    className="input"
+                    placeholder="e.g., 1299"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="input-label">Stock</label>
+                  <input
+                    type="number"
+                    value={stock}
+                    onChange={(e) => setStock(e.target.value)}
+                    className="input"
+                    placeholder="e.g., 100"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Additional Info */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="input-label">Package Size *</label>
                 <input
-                    id="images"
+                  type="text"
+                  value={packageSize}
+                  onChange={(e) => setPackageSize(e.target.value)}
+                  className="input"
+                  placeholder="e.g., Pack of 12, 1 Dozen, Per Piece"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="input-label">Tags</label>
+                <input
+                  type="text"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  className="input"
+                  placeholder="e.g., birthday, party, decoration"
+                />
+                <p className="input-hint">Comma-separated tags</p>
+              </div>
+            </div>
+
+            {/* Images */}
+            <div>
+              <h3 className="text-sm font-medium text-nexus-200 mb-3">Images</h3>
+
+              {/* Existing Images */}
+              {existingImages.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs text-nexus-400 mb-2">Current Images</p>
+                  <div className="flex flex-wrap gap-3">
+                    {existingImages.map((url, index) => (
+                      <div
+                        key={index}
+                        className="relative group w-20 h-20 rounded-lg overflow-hidden bg-nexus-700"
+                      >
+                        <img
+                          src={`http://localhost:5000/api${url}`}
+                          alt={`Existing ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveExistingImage(url)}
+                          className="absolute inset-0 bg-nexus-900/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <HiOutlineTrash className="w-5 h-5 text-status-error" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* New Image Upload */}
+              <div>
+                <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-nexus-500 rounded-xl cursor-pointer hover:border-accent transition-colors bg-nexus-700/20">
+                  <HiOutlinePhotograph className="w-8 h-8 text-nexus-400 mb-2" />
+                  <span className="text-sm text-nexus-300">
+                    Click to upload images
+                  </span>
+                  <span className="text-xs text-nexus-400 mt-1">
+                    PNG, JPEG, or WebP
+                  </span>
+                  <input
                     type="file"
                     multiple
                     accept=".png, .jpeg, .webp, .jpg"
                     onChange={handleFileChange}
-                    className="w-full border rounded px-3 py-2"
-                />
-                <div className="mt-4 flex flex-wrap gap-4">
-                    {previewImages.map((url, index) => (
-                        <img
-                            key={index}
+                    className="hidden"
+                  />
+                </label>
+
+                {/* New Image Previews */}
+                {previewImages.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-xs text-nexus-400 mb-2">New Images</p>
+                    <div className="flex flex-wrap gap-3">
+                      {previewImages.map((url, index) => (
+                        <div
+                          key={index}
+                          className="relative group w-20 h-20 rounded-lg overflow-hidden bg-nexus-700"
+                        >
+                          <img
                             src={url}
                             alt={`Preview ${index + 1}`}
-                            className="w-20 h-20 object-cover border rounded"
-                        />
-                    ))}
-                </div>
+                            className="w-full h-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveNewImage(index)}
+                            className="absolute inset-0 bg-nexus-900/70 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <HiOutlineTrash className="w-5 h-5 text-status-error" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex justify-end gap-4">
-                <button
-                    type="button"
-                    onClick={onCancel}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
-                >
-                    Cancel
-                </button>
-                <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                    Submit
-                </button>
-            </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-nexus-600 bg-nexus-850">
+            <button type="button" onClick={onCancel} className="btn-secondary">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary relative"
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-nexus-900 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <HiOutlinePlus className="w-4 h-4" />
+                  {initialProduct ? "Update Product" : "Add Product"}
+                </>
+              )}
+            </button>
+          </div>
         </form>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default ProductForm;

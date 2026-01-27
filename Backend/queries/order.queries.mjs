@@ -3,10 +3,11 @@ const INSERT_ORDER = `
 `;
 
 const GET_USER_ORDERS = `
-    SELECT 
+    SELECT
         o.id AS order_id,
         o.user_id,
         o.total_amount,
+        o.status,
         o.created_at,
         jsonb_agg(
             jsonb_build_object(
@@ -14,6 +15,8 @@ const GET_USER_ORDERS = `
                 'product_name', p.product_name,
                 'quantity', oi.quantity,
                 'sales_price', oi.price::float8,
+                'mrp', p.mrp::float8,
+                'images', p.images,
                 'total_price', (oi.quantity * oi.price)::float8
             )
         ) FILTER (WHERE oi.product_id IS NOT NULL) AS order_items
@@ -21,7 +24,7 @@ const GET_USER_ORDERS = `
     LEFT JOIN Order_Items oi ON o.id = oi.order_id
     LEFT JOIN Products p ON oi.product_id = p.id
     WHERE o.user_id = $1
-    GROUP BY o.id, o.user_id, o.total_amount, o.created_at
+    GROUP BY o.id, o.user_id, o.total_amount, o.status, o.created_at
     ORDER BY o.created_at DESC
     LIMIT $2 OFFSET $3;
 `;

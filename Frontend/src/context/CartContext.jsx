@@ -49,16 +49,16 @@ export const CartProvider = ({ children }) => {
             await cartService.addItemToCart(product.id, user.token);
             setCartItems((prevItems) => {
                 const existingItem = prevItems.find(
-                    (item) => item.id === product.id
+                    (item) => item.product_id === product.id || item.id === product.id
                 );
                 if (existingItem) {
                     return prevItems.map((item) =>
-                        item.id === product.id
+                        (item.product_id === product.id || item.id === product.id)
                             ? { ...item, quantity: item.quantity + 1 }
                             : item
                     );
                 } else {
-                    return [...prevItems, { ...product, quantity: 1 }];
+                    return [...prevItems, { ...product, product_id: product.id, quantity: 1 }];
                 }
             });
         } catch (error) {
@@ -81,7 +81,9 @@ export const CartProvider = ({ children }) => {
             await cartService.updateCart(productId, quantity, user.token);
             setCartItems((prevItems) =>
                 prevItems.map((item) =>
-                    item.id === productId ? { ...item, quantity } : item
+                    (item.product_id === productId || item.id === productId)
+                        ? { ...item, quantity }
+                        : item
                 )
             );
         } catch (error) {
@@ -99,7 +101,7 @@ export const CartProvider = ({ children }) => {
         try {
             await cartService.removeItemFromCart(productId, user.token);
             setCartItems((prevItems) =>
-                prevItems.filter((item) => item.id !== productId)
+                prevItems.filter((item) => item.product_id !== productId && item.id !== productId)
             );
         } catch (error) {
             handleError(error.message || "Failed to remove item from cart.");
@@ -143,7 +145,9 @@ export const CartProvider = ({ children }) => {
 
     // Get a specific cart item's quantity
     const getCartItemQuantity = (productId) => {
-        const item = cartItems.find((item) => item.id === productId);
+        const item = cartItems.find(
+            (item) => item.product_id === productId || item.id === productId
+        );
         return item ? item.quantity : 0;
     };
 
@@ -168,6 +172,7 @@ export const CartProvider = ({ children }) => {
                 updateItemQuantity,
                 removeItemFromCart,
                 clearCart,
+                refreshCart: fetchCartItems,
                 getCartItemQuantity,
                 getTotalQuantity,
                 getTotalPrice,
