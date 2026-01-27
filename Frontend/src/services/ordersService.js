@@ -4,13 +4,11 @@ const API_URL = "http://localhost:5000/api/orders";
 
 export const orderService = {
 	// Create an order from the cart
-	createOrder: async (token) => {
-		console.log(token);
-
+	createOrder: async (token, addressId) => {
 		try {
 			const response = await axios.post(
 				`${API_URL}/create`,
-				{},
+				{ address_id: addressId },
 				{
 					headers: {
 						Authorization: `Bearer ${token}`,
@@ -64,7 +62,7 @@ export const orderService = {
 	// Cancel a specific order
 	cancelOrder: async (token, orderId) => {
 		try {
-			const response = await axios.delete(`${API_URL}/${orderId}`, {
+			const response = await axios.put(`${API_URL}/${orderId}`, {}, {
 				headers: {
 					Authorization: `Bearer ${token}`,
 				},

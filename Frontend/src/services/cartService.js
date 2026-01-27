@@ -145,13 +145,16 @@ export const cartService = {
     // Get the total cost of the cart
     getCartTotal: async (token) => {
         try {
-            const response = await axios.get(`${API_URL}/total`, {
+            const response = await axios.get(`${API_URL}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
                 withCredentials: true,
             });
-            return response.data;
+            return {
+                totalQuantity: response.data.total_quantity || 0,
+                totalPrice: response.data.total_amount || 0,
+            };
         } catch (error) {
             throw new Error(
                 error.response?.data?.message || "Error fetching cart total"
@@ -165,17 +168,17 @@ export const cartService = {
             throw new Error("Product ID and token are required");
         }
         try {
-            const response = await axios.post(
-                `${API_URL}/check-quantity`,
-                { product_id: productId },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                    withCredentials: true,
-                }
+            const response = await axios.get(`${API_URL}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                withCredentials: true,
+            });
+            const cartItems = response.data?.items || [];
+            const item = cartItems.find(
+                (item) => item.product_id === productId || item.id === productId
             );
-            return response.data;
+            return item || null;
         } catch (error) {
             throw new Error(
                 error.response?.data?.message ||

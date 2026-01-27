@@ -148,12 +148,6 @@ const getUserOrders = async (req, res) => {
 			offset,
 		]);
 
-		// If no orders are found
-		if (result.rows.length === 0) {
-			return res
-				.status(404)
-				.json({ message: ORDER_FEEDBACK_MESSAGES.NO_ORDERS_FOUND });
-		}
 		/*
 		// Group orders by order_id and accumulate order items under each order
 		const orders = result.rows.reduce((acc, row) => {
@@ -189,11 +183,8 @@ const getUserOrders = async (req, res) => {
 		}, []);
 		*/
 
-		// Format the created_at date and prepare the response
-		const orders = result.rows.map((row) => ({
-			...row,
-			created_at: formatDate(row.created_at),
-		}));
+		// Return orders with raw dates (frontend handles formatting)
+		const orders = result.rows;
 
 		// Respond with paginated orders and metadata
 		res.status(200).json({
