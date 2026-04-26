@@ -155,3 +155,10 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react
+# Added by code-review-graph
+.code-review-graph/
+.claude/
+.cursor/
+CLAUDE.md
+.mcp.json
+.opencode.json
