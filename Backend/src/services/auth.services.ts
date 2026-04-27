@@ -1,0 +1,45 @@
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+import { userRepository } from "../repositories/user.repositories";
+import { validateUserLogin, validateUserSignup } from "../schemas/user.schemas";
+import { ApiError } from "../utils/api_error";
+import { ROLES } from "../constants/app.constants";
+import { USER_FEEDBACK_MESSAGES } from "../constants/app.messages";
+import { config } from "../constants/config";
+
+export const authService = {
+	async signup(data: unknown) {
+		const parsedBody = validateUserSignup(data);
+
+		const userExists = await userRepository.existsByEmail(parsedBody.email);
+		if (userExists) {
+			throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_ALREADY_EXISTS);
+		}
+
+		const role = parsedBody.email.endsWith("@google.com") ? ROLES.ADMIN : ROLES.CUSTOMER;
+		const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
+
+		return await userRepository.create({
+			name: parsedBody.name,
+			email: parsedBody.email,
+			password: hashedPassword,
+			role,
+		});
+	},
+
+	async login(data: unknown) {
+		const credentials = validateUserLogin(data);
+		const user = await userRepository.findByEmail(credentials.email);
+		if (!user) {
+			throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_NOT_FOUND);
+		}
+
+		const isMatch = await bcrypt.compare(credentials.password, user.password);
+		if (!isMatch) {
+			throw new ApiError(400, USER_FEEDBACK_MESSAGES.INVALID_CREDENTIALS);
+		}
+
+		const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, config.JWT_SECRET, { expiresIn: "10h" });
+		return { token, role: user.role, name: user.name };
+	},
+};
