@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, memo } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { toast } from "react-toastify";
@@ -244,4 +244,7 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+// ⚡ Bolt: Wrapped with React.memo() to prevent unnecessary re-renders
+// 🎯 Why: ProductCard is rendered in lists. Unrelated parent state changes (like search/pagination) trigger re-renders.
+// 📊 Impact: Prevents O(n) component re-renders when parent state updates. Shallow compares primitive props automatically.
+export default memo(ProductCard);
