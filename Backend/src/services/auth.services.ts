@@ -6,40 +6,57 @@ import { ApiError } from "../utils/api_error";
 import { ROLES } from "../constants/app.constants";
 import { USER_FEEDBACK_MESSAGES } from "../constants/app.messages";
 import { config } from "../constants/config";
+import { getLogger } from "../lib/logger";
+
+const logger = getLogger("auth.service");
 
 export const authService = {
 	async signup(data: unknown) {
-		const parsedBody = validateUserSignup(data);
+		try {
+			const parsedBody = validateUserSignup(data);
 
-		const userExists = await userRepository.existsByEmail(parsedBody.email);
-		if (userExists) {
-			throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_ALREADY_EXISTS);
+			const userExists = await userRepository.existsByEmail(parsedBody.email);
+			if (userExists) {
+				throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_ALREADY_EXISTS);
+			}
+
+			const role = parsedBody.email.endsWith("@google.com") ? ROLES.ADMIN : ROLES.CUSTOMER;
+			const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
+
+			return await userRepository.create({
+				name: parsedBody.name,
+				email: parsedBody.email,
+				password: hashedPassword,
+				role,
+			});
+		} catch (error) {
+			if (!(error instanceof ApiError)) {
+				logger.error("Signup failed", { email: (data as any)?.email, error: (error as Error).message, stack: (error as Error).stack });
+			}
+			throw error;
 		}
-
-		const role = parsedBody.email.endsWith("@google.com") ? ROLES.ADMIN : ROLES.CUSTOMER;
-		const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
-
-		return await userRepository.create({
-			name: parsedBody.name,
-			email: parsedBody.email,
-			password: hashedPassword,
-			role,
-		});
 	},
 
 	async login(data: unknown) {
-		const credentials = validateUserLogin(data);
-		const user = await userRepository.findByEmail(credentials.email);
-		if (!user) {
-			throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_NOT_FOUND);
-		}
+		try {
+			const credentials = validateUserLogin(data);
+			const user = await userRepository.findByEmail(credentials.email);
+			if (!user) {
+				throw new ApiError(400, USER_FEEDBACK_MESSAGES.USER_NOT_FOUND);
+			}
 
-		const isMatch = await bcrypt.compare(credentials.password, user.password);
-		if (!isMatch) {
-			throw new ApiError(400, USER_FEEDBACK_MESSAGES.INVALID_CREDENTIALS);
-		}
+			const isMatch = await bcrypt.compare(credentials.password, user.password);
+			if (!isMatch) {
+				throw new ApiError(400, USER_FEEDBACK_MESSAGES.INVALID_CREDENTIALS);
+			}
 
-		const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, config.JWT_SECRET, { expiresIn: "10h" });
-		return { token, role: user.role, name: user.name };
+			const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, config.JWT_SECRET, { expiresIn: "10h" });
+			return { token, role: user.role, name: user.name };
+		} catch (error) {
+			if (!(error instanceof ApiError)) {
+				logger.error("Login failed", { email: (data as any)?.email, error: (error as Error).message, stack: (error as Error).stack });
+			}
+			throw error;
+		}
 	},
 };

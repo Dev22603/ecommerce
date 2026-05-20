@@ -2,11 +2,15 @@ import { Request, Response } from "express";
 import { addressService } from "../services/address.services";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
+import { getLogger } from "../lib/logger";
+
+const logger = getLogger("address.controller");
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) {
 		return res.status(error.code).json(error.errors.length ? { success: false, message: error.message, errors: error.errors } : { success: false, error: error.message });
 	}
+	logger.error("Address unexpected error", { error: (error as Error).message, stack: (error as Error).stack });
 	return res.status(500).json({ success: false, message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
 };
 

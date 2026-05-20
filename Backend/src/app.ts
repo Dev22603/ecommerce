@@ -1,4 +1,4 @@
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import path from "path";
 import authRoutes from "./routes/auth.routes";
@@ -9,6 +9,7 @@ import orderRoutes from "./routes/order.routes";
 import addressRoutes from "./routes/address.routes";
 import { config } from "./constants/config";
 import { requestLogger } from "./middlewares/logging";
+import logger from "./lib/logger";
 
 const app = express();
 
@@ -38,5 +39,10 @@ app.use("/api/address", addressRoutes);
 
 const uploadsDir = path.resolve("uploads");
 app.use("/api/uploads", express.static(uploadsDir));
+
+app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+	logger.error("Unhandled server error", { error: err.message, stack: err.stack });
+	res.status(500).json({ message: "Internal server error" });
+});
 
 export { app };
