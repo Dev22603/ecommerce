@@ -1,20 +1,13 @@
-import winston from "winston";
+import { setupLogging, getLogger } from "crisplogs";
 
-const { combine, timestamp, colorize, printf } = winston.format;
-
-const logFormat = printf(({ level, message, timestamp, ...extras }) => {
-	const extraStr = Object.keys(extras).length ? " " + JSON.stringify(extras) : "";
-	return `\n[${level}]: ${timestamp} ${message}${extraStr}`;
+setupLogging({
+	level: "DEBUG",
+	style: "short-dynamic",
+	datefmt: "%H:%M:%S %d-%m-%Y",
+	extraFormat: "inline",
 });
 
-const logger = winston.createLogger({
-	level: "debug",
-	format: combine(colorize(), timestamp({ format: "HH:mm:ss DD-MM-YYYY" }), logFormat),
-	transports: [new winston.transports.Console()],
-});
+const logger = getLogger("app");
 
-export function getLogger(name: string) {
-	return logger.child({ service: name });
-}
-
+export { getLogger };
 export default logger;
