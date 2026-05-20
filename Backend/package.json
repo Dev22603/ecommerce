@@ -24,12 +24,12 @@
     "@prisma/client": "^7.6.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
+    "crisplogs": "^0.2.3",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.13.1",
-    "winston": "^3.19.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
