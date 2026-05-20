@@ -2,10 +2,14 @@ import { Request, Response } from "express";
 import { cartService } from "../services/cart.services";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
+import { getLogger } from "../lib/logger";
+
+const logger = getLogger("cart.controller");
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) return res.status(error.code).json({ message: error.message });
-	return res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error });
+	logger.error("Cart unexpected error", { error: (error as Error).message, stack: (error as Error).stack });
+	return res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
 };
 
 const addItemToCart = async (req: Request, res: Response) => {

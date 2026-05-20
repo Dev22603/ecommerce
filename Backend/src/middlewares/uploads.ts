@@ -2,6 +2,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { LIMITS, UPLOAD_CONFIG } from "../constants/app.constants";
+import { getLogger } from "../lib/logger";
+
+const logger = getLogger("uploads.middleware");
 
 const uploadDir = path.resolve("uploads");
 if (!fs.existsSync(uploadDir)) {
@@ -24,6 +27,7 @@ const fileFilter = (_req: any, file: { originalname: string; mimetype: string },
 	if (mimetype && extname) {
 		cb(null, true);
 	} else {
+		logger.warn("Invalid file upload rejected", { originalname: file.originalname, mimetype: file.mimetype });
 		cb(new Error("Only .jpeg, .jpg, .png, and .webp files are allowed!"));
 	}
 };

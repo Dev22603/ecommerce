@@ -3,10 +3,14 @@ import { orderService } from "../services/order.services";
 import { validatePagination } from "../utils/common_functions";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
+import { getLogger } from "../lib/logger";
+
+const logger = getLogger("order.controller");
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) return res.status(error.code).json({ message: error.message });
-	return res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR, error: (error as Error).message });
+	logger.error("Order unexpected error", { error: (error as Error).message, stack: (error as Error).stack });
+	return res.status(500).json({ message: GLOBAL_ERROR_MESSAGES.SERVER_ERROR });
 };
 
 const createOrder = async (req: Request, res: Response) => {
