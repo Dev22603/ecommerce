@@ -28,7 +28,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(express.static("uploads"));
 
-app.get("/health", (_req, res) => {
+app.get("/health", (req, res) => {
+	logger.debug("Health check", { ip: req.ip });
 	res.status(200).json({ status: "Server is Up and Running!" });
 });
 
@@ -42,7 +43,16 @@ app.use("/api/address", addressRoutes);
 const uploadsDir = path.resolve("uploads");
 app.use("/api/uploads", express.static(uploadsDir));
 
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((req: Request, res: Response) => {
+	logger.warn("Route not found", { method: req.method, path: req.originalUrl, ip: req.ip });
+	res.status(404).json({ message: "Not found" });
+});
+
+app.use((err: Error & { status?: number; body?: unknown }, req: Request, res: Response, _next: NextFunction) => {
+	if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+		logger.warn("Malformed JSON body", { path: req.path, ip: req.ip });
+		return res.status(400).json({ message: "Invalid JSON" });
+	}
 	logger.error("Unhandled server error", { error: err.message, stack: err.stack });
 	res.status(500).json({ message: "Internal server error" });
 });

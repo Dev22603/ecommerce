@@ -19,7 +19,7 @@ export const authenticate = (req: Request, res: Response, next: NextFunction) =>
 		next();
 	} catch (err) {
 		logger.warn("Request rejected - invalid token", { path: req.path, error: (err as Error).message });
-		res.status(400).json({ error: "Invalid token", err });
+		res.status(400).json({ error: "Invalid token" });
 	}
 };
 

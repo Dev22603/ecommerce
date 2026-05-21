@@ -11,9 +11,16 @@ const createPrismaClient = () => {
 		const pool = new pg.Pool({ connectionString: config.DATABASE_URL });
 		const adapter = new PrismaPg(pool);
 
+		const prismaLog =
+			config.NODE_ENV === "production"
+				? (["warn", "error"] as const)
+				: config.LOG_LEVEL === "DEBUG"
+					? (["query", "info", "warn", "error"] as const)
+					: (["warn", "error"] as const);
+
 		return new PrismaClient({
 			adapter,
-			log: ["query", "info", "warn", "error"],
+			log: [...prismaLog],
 		});
 	} catch (error) {
 		logger.critical("Failed to create Prisma client", { error: (error as Error).message, stack: (error as Error).stack });

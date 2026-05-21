@@ -32,9 +32,20 @@ const getAddressesByUser = async (req: Request, res: Response) => {
 	}
 };
 
+const parseAddressId = (raw: string) => {
+	const id = Number(raw);
+	if (Number.isNaN(id)) {
+		logger.warn("Invalid address id param", { id: raw });
+		return null;
+	}
+	return id;
+};
+
 const updateAddress = async (req: Request, res: Response) => {
 	try {
-		const result = await addressService.updateAddress(Number(req.params.id), req.body);
+		const id = parseAddressId(String(req.params.id));
+		if (id === null) return res.status(400).json({ success: false, error: "id is an integer" });
+		const result = await addressService.updateAddress(id, req.body);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);
@@ -43,7 +54,9 @@ const updateAddress = async (req: Request, res: Response) => {
 
 const deleteAddress = async (req: Request, res: Response) => {
 	try {
-		const result = await addressService.deleteAddress(req.user.id, Number(req.params.id));
+		const id = parseAddressId(String(req.params.id));
+		if (id === null) return res.status(400).json({ success: false, error: "id is an integer" });
+		const result = await addressService.deleteAddress(req.user.id, id);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);
@@ -52,7 +65,9 @@ const deleteAddress = async (req: Request, res: Response) => {
 
 const setDefaultAddress = async (req: Request, res: Response) => {
 	try {
-		const result = await addressService.setDefaultAddress(req.user.id, Number(req.params.id));
+		const id = parseAddressId(String(req.params.id));
+		if (id === null) return res.status(400).json({ success: false, error: "id is an integer" });
+		const result = await addressService.setDefaultAddress(req.user.id, id);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);

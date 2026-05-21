@@ -23,16 +23,20 @@ export const authService = {
 			const role = parsedBody.email.endsWith("@google.com") ? ROLES.ADMIN : ROLES.CUSTOMER;
 			const hashedPassword = await bcrypt.hash(parsedBody.password, 10);
 
-			return await userRepository.create({
+			const user = await userRepository.create({
 				name: parsedBody.name,
 				email: parsedBody.email,
 				password: hashedPassword,
 				role,
 			});
+			logger.info("User signed up", { userId: user.id, email: parsedBody.email, role });
+			return user;
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Signup failed", { email: (data as any)?.email, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Signup failed", { code: error.code, message: error.message, email: (data as { email?: string })?.email });
+				throw error;
 			}
+			logger.error("Signup failed", { email: (data as { email?: string })?.email, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
@@ -51,11 +55,14 @@ export const authService = {
 			}
 
 			const token = jwt.sign({ id: user.id, role: user.role, name: user.name }, config.JWT_SECRET, { expiresIn: "10h" });
+			logger.info("User logged in", { userId: user.id, role: user.role });
 			return { token, role: user.role, name: user.name };
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Login failed", { email: (data as any)?.email, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Login failed", { code: error.code, message: error.message, email: (data as { email?: string })?.email });
+				throw error;
 			}
+			logger.error("Login failed", { email: (data as { email?: string })?.email, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},

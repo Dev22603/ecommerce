@@ -22,11 +22,14 @@ export const orderService = {
 			if (result.kind === "insufficient_stock") {
 				throw new ApiError(400, `Insufficient stock for product: ${result.productName}. Available: ${result.available}, Required: ${result.required}`);
 			}
+			logger.info("Order created", { userId, orderId: result.orderId, addressId: address_id });
 			return { message: ORDER_FEEDBACK_MESSAGES.ORDER_CREATED_SUCCESS, order_id: result.orderId };
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Create order failed", { userId, addressId: (data as any)?.address_id, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Create order failed", { code: error.code, message: error.message, userId, addressId: (data as { address_id?: number })?.address_id });
+				throw error;
 			}
+			logger.error("Create order failed", { userId, addressId: (data as { address_id?: number })?.address_id, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
@@ -42,7 +45,9 @@ export const orderService = {
 				orders,
 			};
 		} catch (error) {
-			logger.error("Get user orders failed", { userId, page, limit, error: (error as Error).message, stack: (error as Error).stack });
+			if (!(error instanceof ApiError)) {
+				logger.error("Get user orders failed", { userId, page, limit, error: (error as Error).message, stack: (error as Error).stack });
+			}
 			throw error;
 		}
 	},
@@ -53,9 +58,11 @@ export const orderService = {
 			if (!order) throw new ApiError(404, "Order not found");
 			return order;
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Get order details failed", { orderId, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Get order details failed", { code: error.code, message: error.message, orderId });
+				throw error;
 			}
+			logger.error("Get order details failed", { orderId, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
@@ -68,11 +75,14 @@ export const orderService = {
 				throw new ApiError(400, `Cannot cancel order that is not ${ORDER_STATUS.PENDING.toLowerCase()}.`);
 			}
 			await orderRepository.updateStatus(orderId, ORDER_STATUS.CANCELLED);
+			logger.info("Order cancelled", { orderId });
 			return { message: ORDER_FEEDBACK_MESSAGES.ORDER_CANCELLED_SUCCESS, order_id: orderId };
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Cancel order failed", { orderId, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Cancel order failed", { code: error.code, message: error.message, orderId });
+				throw error;
 			}
+			logger.error("Cancel order failed", { orderId, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
@@ -82,11 +92,14 @@ export const orderService = {
 			const { status } = validateOrderStatus(data) as { status: ORDER_STATUS };
 			const order = await orderRepository.updateStatus(orderId, status);
 			if (!order) throw new ApiError(404, "Order not found");
+			logger.info("Order status updated", { orderId, status });
 			return { message: "Order status updated successfully", order };
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Update order status failed", { orderId, status: (data as any)?.status, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Update order status failed", { code: error.code, message: error.message, orderId, status: (data as { status?: string })?.status });
+				throw error;
 			}
+			logger.error("Update order status failed", { orderId, status: (data as { status?: string })?.status, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
@@ -103,9 +116,11 @@ export const orderService = {
 				users,
 			};
 		} catch (error) {
-			if (!(error instanceof ApiError)) {
-				logger.error("Get all orders failed", { page, limit, error: (error as Error).message, stack: (error as Error).stack });
+			if (error instanceof ApiError) {
+				logger.warn("Get all orders failed", { code: error.code, message: error.message, page, limit });
+				throw error;
 			}
+			logger.error("Get all orders failed", { page, limit, error: (error as Error).message, stack: (error as Error).stack });
 			throw error;
 		}
 	},
