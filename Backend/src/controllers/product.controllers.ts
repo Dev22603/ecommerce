@@ -69,7 +69,10 @@ const getAllProducts = async (req: Request, res: Response) => {
 const getProductById = async (req: Request, res: Response) => {
 	try {
 		const id = Number(req.params.id);
-		if (Number.isNaN(id)) return res.status(400).json({ error: "id is an integer" });
+		if (Number.isNaN(id)) {
+			logger.warn("Invalid product id param", { id: req.params.id });
+			return res.status(400).json({ error: "id is an integer" });
+		}
 		const product = await productService.getProductById(id);
 		return res.status(200).json(product);
 	} catch (error) {
@@ -89,7 +92,10 @@ const getCategories = async (_req: Request, res: Response) => {
 const deleteProduct = async (req: Request, res: Response) => {
 	try {
 		const id = Number(req.params.id);
-		if (Number.isNaN(id)) return res.status(400).json({ error: "id is an integer" });
+		if (Number.isNaN(id)) {
+			logger.warn("Invalid product id param", { id: req.params.id });
+			return res.status(400).json({ error: "id is an integer" });
+		}
 		const result = await productService.deleteProduct(id);
 		return res.status(200).json(result);
 	} catch (error) {
@@ -100,7 +106,10 @@ const deleteProduct = async (req: Request, res: Response) => {
 const updateProduct = async (req: Request, res: Response) => {
 	try {
 		const id = Number(req.params.id);
-		if (Number.isNaN(id)) return res.status(400).json({ error: "id is an integer" });
+		if (Number.isNaN(id)) {
+			logger.warn("Invalid product id param", { id: req.params.id });
+			return res.status(400).json({ error: "id is an integer" });
+		}
 		const result = await productService.updateProduct(id, req.body, uploadedFiles(req));
 		return res.status(200).json(result);
 	} catch (error) {

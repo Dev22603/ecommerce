@@ -5,9 +5,19 @@ const databaseUrl =
 	process.env.DATABASE_URL ??
 	`postgresql://${process.env.DB_USER ?? "postgres"}:${process.env.DB_PASSWORD ?? "root"}@${process.env.DB_HOST ?? "localhost"}:${process.env.DB_PORT ?? "5432"}/${process.env.DB_NAME ?? "ecommerce"}`;
 
+const LOG_LEVELS = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] as const;
+type LogLevel = (typeof LOG_LEVELS)[number];
+
+const resolveLogLevel = (): LogLevel => {
+	const raw = (process.env.LOG_LEVEL ?? "INFO").toUpperCase();
+	const normalized = raw === "WARN" ? "WARNING" : raw;
+	return LOG_LEVELS.includes(normalized as LogLevel) ? (normalized as LogLevel) : "INFO";
+};
+
 export const config = {
 	PORT: process.env.PORT || 5000,
 	NODE_ENV: process.env.NODE_ENV || "development",
+	LOG_LEVEL: resolveLogLevel(),
 	API_URL: process.env.API_URL || `http://localhost:${process.env.PORT || 5000}/api`,
 	DB_USER: process.env.DB_USER || "postgres",
 	DB_HOST: process.env.DB_HOST || "localhost",

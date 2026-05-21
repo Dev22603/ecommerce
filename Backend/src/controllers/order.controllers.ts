@@ -32,9 +32,20 @@ const getUserOrders = async (req: Request, res: Response) => {
 	}
 };
 
+const parseOrderId = (raw: string) => {
+	const orderId = Number(raw);
+	if (Number.isNaN(orderId)) {
+		logger.warn("Invalid order_id param", { orderId: raw });
+		return null;
+	}
+	return orderId;
+};
+
 const getOrderDetails = async (req: Request, res: Response) => {
 	try {
-		const result = await orderService.getOrderDetails(Number(req.params.order_id));
+		const orderId = parseOrderId(String(req.params.order_id));
+		if (orderId === null) return res.status(400).json({ message: "order_id is an integer" });
+		const result = await orderService.getOrderDetails(orderId);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);
@@ -43,7 +54,9 @@ const getOrderDetails = async (req: Request, res: Response) => {
 
 const cancelOrder = async (req: Request, res: Response) => {
 	try {
-		const result = await orderService.cancelOrder(Number(req.params.order_id));
+		const orderId = parseOrderId(String(req.params.order_id));
+		if (orderId === null) return res.status(400).json({ message: "order_id is an integer" });
+		const result = await orderService.cancelOrder(orderId);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);
@@ -52,7 +65,9 @@ const cancelOrder = async (req: Request, res: Response) => {
 
 const updateOrderStatus = async (req: Request, res: Response) => {
 	try {
-		const result = await orderService.updateOrderStatus(Number(req.params.order_id), req.body);
+		const orderId = parseOrderId(String(req.params.order_id));
+		if (orderId === null) return res.status(400).json({ message: "order_id is an integer" });
+		const result = await orderService.updateOrderStatus(orderId, req.body);
 		return res.status(200).json(result);
 	} catch (error) {
 		return handleError(res, error);

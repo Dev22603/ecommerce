@@ -2,6 +2,9 @@ import { PrismaClient } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { config } from "../src/constants/config";
+import { moduleLogger } from "../src/lib/logger";
+
+const logger = moduleLogger();
 
 const pool = new pg.Pool({ connectionString: config.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -64,6 +67,7 @@ const products = [
 ] as const;
 
 async function main() {
+	logger.info("Database seed started");
 	for (const categoryName of categories) {
 		await prisma.category.upsert({
 			where: { id: categories.indexOf(categoryName) + 1 },
@@ -80,6 +84,7 @@ async function main() {
 			await prisma.product.create({ data: { productName, salesPrice, mrp, images: [...images], categoryId, stock } });
 		}
 	}
+	logger.info("Database seed completed", { categories: categories.length, products: products.length });
 }
 
 main()
@@ -88,6 +93,6 @@ main()
 		await pool.end();
 	})
 	.catch(async (error) => {
-		console.error(error);
+		logger.error("Database seed failed", { error: (error as Error).message, stack: (error as Error).stack });
 		process.exit(1);
 	});

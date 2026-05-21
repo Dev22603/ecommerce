@@ -11,14 +11,14 @@ import {
 	updateProduct,
 } from "../controllers/product.controllers";
 import { authenticate, authorize } from "../middlewares/auth";
-import { uploadProductImages } from "../middlewares/uploads";
+import { handleProductImageUpload } from "../middlewares/uploads";
 import { ROLES } from "../constants/app.constants";
 
 const router = express.Router();
 
-router.post("/", authenticate, authorize([ROLES.ADMIN]), uploadProductImages, createProduct);
+router.post("/", authenticate, authorize([ROLES.ADMIN]), handleProductImageUpload, createProduct);
 router.delete("/:id", authenticate, authorize([ROLES.ADMIN]), deleteProduct);
-router.put("/:id", authenticate, authorize([ROLES.ADMIN]), uploadProductImages, updateProduct);
+router.put("/:id", authenticate, authorize([ROLES.ADMIN]), handleProductImageUpload, updateProduct);
 router.post("/new_category", authenticate, authorize([ROLES.ADMIN]), createCategory);
 
 router.get("/id/:id", getProductById);

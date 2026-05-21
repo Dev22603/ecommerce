@@ -11,6 +11,7 @@ const validateCartUpdate = (req: Request, res: Response, next: NextFunction) => 
 		next();
 	} catch (error) {
 		if (error instanceof ApiError) {
+			logger.warn("Cart validation failed", { code: error.code, message: error.message });
 			return res.status(error.code).json({ success: false, message: error.message });
 		}
 		logger.error("Cart validation unexpected error", { error: (error as Error).message, stack: (error as Error).stack });

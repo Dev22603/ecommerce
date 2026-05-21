@@ -1,10 +1,20 @@
 import { NextFunction, Request, Response } from "express";
+import { config } from "../constants/config";
 import { moduleLogger } from "../lib/logger";
 
 const logger = moduleLogger();
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
 	const start = Date.now();
+
+	if (config.LOG_LEVEL === "DEBUG") {
+		logger.debug("Request started", {
+			method: req.method,
+			url: req.originalUrl,
+			userId: req.user?.id,
+			ip: req.ip,
+		});
+	}
 
 	res.on("finish", () => {
 		const duration = Date.now() - start;

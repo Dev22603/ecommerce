@@ -42,7 +42,10 @@ const updateCart = async (req: Request, res: Response) => {
 const removeItemFromCart = async (req: Request, res: Response) => {
 	try {
 		const productId = Number(req.params.product_id);
-		if (Number.isNaN(productId)) return res.status(400).json({ error: "product_id is an integer" });
+		if (Number.isNaN(productId)) {
+			logger.warn("Invalid product_id param", { productId: req.params.product_id });
+			return res.status(400).json({ error: "product_id is an integer" });
+		}
 		const result = await cartService.removeItemFromCart(req.user.id, productId);
 		return res.status(200).json(result);
 	} catch (error) {
