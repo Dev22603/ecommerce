@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { cartService } from "../services/cartService";
 import { AuthContext } from "./AuthContext";
 
@@ -125,22 +125,16 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Calculate total price (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalPrice = cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
+    // Calculate total price and quantity memoized
+    const { totalQuantity, totalPrice } = useMemo(() => {
+        return cartItems.reduce(
+            (acc, item) => {
+                acc.totalQuantity += item.quantity;
+                acc.totalPrice += item.sales_price * item.quantity;
+                return acc;
+            },
+            { totalQuantity: 0, totalPrice: 0 }
         );
-        // You can use this `totalPrice` anywhere you need it
-    }, [cartItems]);
-
-    // Calculate total quantity (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalQuantity = cartItems.reduce(
-            (total, item) => total + item.quantity,
-            0
-        );
-        // You can use this `totalQuantity` anywhere you need it
     }, [cartItems]);
 
     // Get a specific cart item's quantity
@@ -151,35 +145,45 @@ export const CartProvider = ({ children }) => {
         return item ? item.quantity : 0;
     };
 
-    // Get the total quantity of items in the cart
-    const getTotalQuantity = () => {
-        return cartItems.reduce((total, item) => total + item.quantity, 0);
-    };
+    // Get the total quantity of items in the cart (kept for backward compatibility, but use totalQuantity directly ideally)
+    const getTotalQuantity = () => totalQuantity;
 
-    // Get the total price of items in the cart
-    const getTotalPrice = () => {
-        return cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-    };
+    // Get the total price of items in the cart (kept for backward compatibility, but use totalPrice directly ideally)
+    const getTotalPrice = () => totalPrice;
+
+    // Memoize the context value to prevent unnecessary re-renders of consumers
+    const contextValue = useMemo(
+        () => ({
+            cartItems,
+            addItemToCart,
+            updateItemQuantity,
+            removeItemFromCart,
+            clearCart,
+            refreshCart: fetchCartItems,
+            getCartItemQuantity,
+            getTotalQuantity,
+            getTotalPrice,
+            totalQuantity,
+            totalPrice,
+            loading,
+            error,
+        }),
+        [
+            cartItems,
+            loading,
+            error,
+            totalQuantity,
+            totalPrice,
+            addItemToCart,
+            updateItemQuantity,
+            removeItemFromCart,
+            clearCart,
+            fetchCartItems,
+        ]
+    );
 
     return (
-        <CartContext.Provider
-            value={{
-                cartItems,
-                addItemToCart,
-                updateItemQuantity,
-                removeItemFromCart,
-                clearCart,
-                refreshCart: fetchCartItems,
-                getCartItemQuantity,
-                getTotalQuantity,
-                getTotalPrice,
-                loading,
-                error,
-            }}
-        >
+        <CartContext.Provider value={contextValue}>
             {children}
         </CartContext.Provider>
     );

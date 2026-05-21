@@ -171,13 +171,19 @@ const Cart = () => {
     }
   };
 
-  const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-  const totalMRP = cartItems.reduce(
-    (sum, item) => sum + (item.mrp || item.price) * item.quantity,
-    0
-  );
-  const discount = totalMRP - subtotal;
-  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+  const { subtotal, totalMRP, discount, itemCount } = React.useMemo(() => {
+    const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+    const totalMRP = cartItems.reduce(
+      (sum, item) => sum + (item.mrp || item.price) * item.quantity,
+      0
+    );
+    return {
+      subtotal,
+      totalMRP,
+      discount: totalMRP - subtotal,
+      itemCount: cartItems.reduce((sum, item) => sum + item.quantity, 0)
+    };
+  }, [cartItems]);
 
   // Empty Cart State
   if (!loading && cartItems.length === 0) {
@@ -192,7 +198,7 @@ const Cart = () => {
               Your cart is empty
             </h1>
             <p className="text-nexus-300 mb-8 max-w-md mx-auto">
-              Looks like you haven't added any products yet. Browse our catalog
+              Looks like you haven&apos;t added any products yet. Browse our catalog
               to find great wholesale deals.
             </p>
             <Link to="/" className="btn-primary btn-lg">

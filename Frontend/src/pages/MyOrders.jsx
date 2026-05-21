@@ -123,7 +123,7 @@ const MyOrders = () => {
               No orders yet
             </h1>
             <p className="text-nexus-300 mb-8 max-w-md mx-auto">
-              You haven't placed any orders yet. Start shopping to see your
+              You haven&apos;t placed any orders yet. Start shopping to see your
               orders here.
             </p>
             <Link to="/" className="btn-primary btn-lg">
