@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { userService } from "../services/user.services";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("user.controller");
+const logger = moduleLogger();
 
 const getAllUsers = async (_req: Request, res: Response) => {
 	try {

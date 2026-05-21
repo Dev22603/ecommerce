@@ -9,7 +9,9 @@ import orderRoutes from "./routes/order.routes";
 import addressRoutes from "./routes/address.routes";
 import { config } from "./constants/config";
 import { requestLogger } from "./middlewares/logging";
-import logger from "./lib/logger";
+import { moduleLogger } from "./lib/logger";
+
+const logger = moduleLogger();
 
 const app = express();
 

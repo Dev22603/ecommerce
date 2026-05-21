@@ -3,10 +3,10 @@ import { productService } from "../services/product.services";
 import { validatePagination } from "../utils/common_functions";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 import { UploadedFile } from "../types/upload";
 
-const logger = getLogger("product.controller");
+const logger = moduleLogger();
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) {

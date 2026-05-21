@@ -4,9 +4,9 @@ import { validateProduct, validateProductUpdate } from "../schemas/product.schem
 import { ApiError } from "../utils/api_error";
 import { PRODUCT_FEEDBACK_MESSAGES, PRODUCT_VALIDATION_ERRORS } from "../constants/app.messages";
 import { UploadedFile } from "../types/upload";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("product.service");
+const logger = moduleLogger();
 
 export const productService = {
 	async createProduct(body: unknown, files: UploadedFile[] = []) {

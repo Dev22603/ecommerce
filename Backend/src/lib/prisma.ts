@@ -2,9 +2,9 @@ import { PrismaClient } from "../generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import { config } from "../constants/config";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "./logger";
 
-const logger = getLogger("prisma");
+const logger = moduleLogger();
 
 const createPrismaClient = () => {
 	try {

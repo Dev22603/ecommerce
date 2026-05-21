@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import { validateCartUpdateData } from "../schemas/cart.schemas";
 import { ApiError } from "../utils/api_error";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("validate-cart.middleware");
+const logger = moduleLogger();
 
 const validateCartUpdate = (req: Request, res: Response, next: NextFunction) => {
 	try {

@@ -1,7 +1,7 @@
 import { prisma } from "../lib/prisma";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("cart.repository");
+const logger = moduleLogger();
 
 const includeProduct = { product: true };
 
