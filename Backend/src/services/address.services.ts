@@ -1,9 +1,9 @@
 import { addressRepository } from "../repositories/address.repositories";
 import { validateAddress } from "../schemas/address.schemas";
 import { ApiError } from "../utils/api_error";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("address.service");
+const logger = moduleLogger();
 
 export const addressService = {
 	async createAddress(userId: number, data: unknown) {

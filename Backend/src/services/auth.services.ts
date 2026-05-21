@@ -6,9 +6,9 @@ import { ApiError } from "../utils/api_error";
 import { ROLES } from "../constants/app.constants";
 import { USER_FEEDBACK_MESSAGES } from "../constants/app.messages";
 import { config } from "../constants/config";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("auth.service");
+const logger = moduleLogger();
 
 export const authService = {
 	async signup(data: unknown) {

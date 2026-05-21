@@ -1,7 +1,7 @@
 import { userRepository } from "../repositories/user.repositories";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("user.service");
+const logger = moduleLogger();
 
 export const userService = {
 	async getAllUsers() {

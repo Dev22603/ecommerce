@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { ORDER_STATUS } from "../constants/app.constants";
 import { mapOrder, toNumber } from "../utils/mappers";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("order.repository");
+const logger = moduleLogger();
 
 const orderInclude = {
 	orderItems: {

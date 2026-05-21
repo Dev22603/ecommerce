@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { addressService } from "../services/address.services";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("address.controller");
+const logger = moduleLogger();
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) {

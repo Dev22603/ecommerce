@@ -1,9 +1,9 @@
 import { prisma } from "../lib/prisma";
 import { ROLES } from "../constants/app.constants";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 import { mapUser } from "../utils/mappers";
 
-const logger = getLogger("user.repository");
+const logger = moduleLogger();
 
 export const userRepository = {
 	async existsByEmail(email: string) {

@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { mapProduct } from "../utils/mappers";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("product.repository");
+const logger = moduleLogger();
 
 export const productRepository = {
 	async create(data: { product_name: string; sales_price: number; mrp: number; images: string[]; category_id: number; stock: number }) {

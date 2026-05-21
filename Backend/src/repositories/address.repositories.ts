@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { mapAddress } from "../utils/mappers";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("address.repository");
+const logger = moduleLogger();
 
 export const addressRepository = {
 	async create(userId: number, data: any) {

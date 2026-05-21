@@ -2,9 +2,9 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { config } from "../constants/config";
 import { ROLES } from "../constants/app.constants";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("auth.middleware");
+const logger = moduleLogger();
 
 export const authenticate = (req: Request, res: Response, next: NextFunction) => {
 	const token = req.headers.authorization?.split(" ")[1];

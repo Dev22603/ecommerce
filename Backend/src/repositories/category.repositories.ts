@@ -1,8 +1,8 @@
 import { prisma } from "../lib/prisma";
 import { mapCategory } from "../utils/mappers";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("category.repository");
+const logger = moduleLogger();
 
 export const categoryRepository = {
 	async existsById(id: number) {

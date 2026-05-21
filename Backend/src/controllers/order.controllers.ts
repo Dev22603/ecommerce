@@ -3,9 +3,9 @@ import { orderService } from "../services/order.services";
 import { validatePagination } from "../utils/common_functions";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("order.controller");
+const logger = moduleLogger();
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) return res.status(error.code).json({ message: error.message });

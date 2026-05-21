@@ -4,9 +4,9 @@ import { validateCreateOrder, validateOrderStatus } from "../schemas/order.schem
 import { ORDER_STATUS } from "../constants/app.constants";
 import { ORDER_FEEDBACK_MESSAGES, ORDER_VALIDATION_ERRORS } from "../constants/app.messages";
 import { ApiError } from "../utils/api_error";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("order.service");
+const logger = moduleLogger();
 
 export const orderService = {
 	async createOrder(userId: number, data: unknown) {

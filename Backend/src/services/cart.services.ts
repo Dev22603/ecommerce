@@ -2,9 +2,9 @@ import { cartRepository } from "../repositories/cart.repositories";
 import { productRepository } from "../repositories/product.repositories";
 import { validateCartAddData, validateCartUpdateData } from "../schemas/cart.schemas";
 import { ApiError } from "../utils/api_error";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("cart.service");
+const logger = moduleLogger();
 
 const mapCartItem = (item: any) => ({
 	quantity: item.quantity,

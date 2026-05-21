@@ -2,9 +2,9 @@ import { Request, Response } from "express";
 import { cartService } from "../services/cart.services";
 import { ApiError } from "../utils/api_error";
 import { GLOBAL_ERROR_MESSAGES } from "../constants/app.messages";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("cart.controller");
+const logger = moduleLogger();
 
 const handleError = (res: Response, error: unknown) => {
 	if (error instanceof ApiError) return res.status(error.code).json({ message: error.message });

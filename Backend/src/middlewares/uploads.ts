@@ -2,9 +2,9 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { LIMITS, UPLOAD_CONFIG } from "../constants/app.constants";
-import { getLogger } from "../lib/logger";
+import { moduleLogger } from "../lib/logger";
 
-const logger = getLogger("uploads.middleware");
+const logger = moduleLogger();
 
 const uploadDir = path.resolve("uploads");
 if (!fs.existsSync(uploadDir)) {

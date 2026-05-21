@@ -1,4 +1,4 @@
-import { setupLogging, getLogger } from "crisplogs";
+import { setupLogging, moduleLogger } from "crisplogs";
 
 setupLogging({
 	level: "DEBUG",
@@ -7,7 +7,4 @@ setupLogging({
 	extraFormat: "inline",
 });
 
-const logger = getLogger("app");
-
-export { getLogger };
-export default logger;
+export { moduleLogger };
