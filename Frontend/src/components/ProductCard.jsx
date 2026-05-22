@@ -244,4 +244,7 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+// Optimization: Wrapping ProductCard with React.memo prevents unnecessary re-renders
+// when the parent component (e.g., Home list) re-renders due to unrelated state changes.
+// Context changes (like cart updates) will still safely trigger re-renders.
+export default React.memo(ProductCard);

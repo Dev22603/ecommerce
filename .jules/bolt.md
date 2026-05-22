@@ -1,0 +1,3 @@
+## 2024-05-22 - Memoize ProductCard without Custom Equality
+**Learning:** Initially attempted to optimize ProductCard lists using `React.memo` with a custom equality function checking only `id`, `stock`, and `sales_price`. This was a rejected change because it introduced a subtle bug where updates to other product fields (like `product_name` or `images`) would be ignored, rendering stale data.
+**Action:** Use `React.memo(Component)` for safe shallow comparison. Context changes correctly trigger re-renders, preventing unnecessary updates from parent lists while ensuring all prop changes are caught.
