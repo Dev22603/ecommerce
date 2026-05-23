@@ -244,4 +244,8 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+/*
+ * PERFORMANCE OPTIMIZATION: React.memo prevents unnecessary re-renders of the product grid
+ * when unrelated state (like the searchQuery in Home.jsx) changes rapidly.
+ */
+export default React.memo(ProductCard);
