@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { user } = useContext(AuthContext);
   const {
-    cartItems,
+    cartDictionary,
     addItemToCart,
     updateItemQuantity,
     removeItemFromCart,
@@ -30,9 +30,8 @@ const ProductCard = ({ product }) => {
     : null;
 
   // Get cart item and quantity from context
-  const cartItem = cartItems.find(
-    (item) => item.product_id === product.id || item.id === product.id
-  );
+  // ⚡ Bolt Optimization: Replaced O(n) array lookup with O(1) hash map lookup
+  const cartItem = cartDictionary?.[product.id];
   const quantity = cartItem?.quantity || 0;
 
   const handleAddToCart = async () => {

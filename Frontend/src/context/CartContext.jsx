@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { cartService } from "../services/cartService";
 import { AuthContext } from "./AuthContext";
 
@@ -125,49 +125,51 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Calculate total price (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalPrice = cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-        // You can use this `totalPrice` anywhere you need it
+    // ⚡ Bolt Optimization: O(n) Hash Map Lookup
+    // Instead of doing cartItems.find() in every ProductCard (which is O(n²) total),
+    // we build a dictionary once per cart update. O(n) total time.
+    const cartDictionary = useMemo(() => {
+        const dict = {};
+        cartItems.forEach(item => {
+            const id = item.product_id || item.id;
+            if (id) dict[id] = item;
+        });
+        return dict;
     }, [cartItems]);
 
-    // Calculate total quantity (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalQuantity = cartItems.reduce(
-            (total, item) => total + item.quantity,
-            0
-        );
-        // You can use this `totalQuantity` anywhere you need it
+    // ⚡ Bolt Optimization: Memoize expensive calculations
+    const memoizedTotalQuantity = useMemo(() => {
+        return cartItems.reduce((total, item) => total + item.quantity, 0);
     }, [cartItems]);
 
-    // Get a specific cart item's quantity
+    const memoizedTotalPrice = useMemo(() => {
+        return cartItems.reduce(
+            (total, item) => total + (item.sales_price || 0) * item.quantity,
+            0
+        );
+    }, [cartItems]);
+
+    // Get a specific cart item's quantity (now O(1))
     const getCartItemQuantity = (productId) => {
-        const item = cartItems.find(
-            (item) => item.product_id === productId || item.id === productId
-        );
+        const item = cartDictionary[productId];
         return item ? item.quantity : 0;
     };
 
     // Get the total quantity of items in the cart
     const getTotalQuantity = () => {
-        return cartItems.reduce((total, item) => total + item.quantity, 0);
+        return memoizedTotalQuantity;
     };
 
     // Get the total price of items in the cart
     const getTotalPrice = () => {
-        return cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
+        return memoizedTotalPrice;
     };
 
     return (
         <CartContext.Provider
             value={{
                 cartItems,
+                cartDictionary,
                 addItemToCart,
                 updateItemQuantity,
                 removeItemFromCart,
@@ -176,6 +178,8 @@ export const CartProvider = ({ children }) => {
                 getCartItemQuantity,
                 getTotalQuantity,
                 getTotalPrice,
+                totalQuantity: memoizedTotalQuantity,
+                totalPrice: memoizedTotalPrice,
                 loading,
                 error,
             }}

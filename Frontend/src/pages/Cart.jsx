@@ -192,7 +192,7 @@ const Cart = () => {
               Your cart is empty
             </h1>
             <p className="text-nexus-300 mb-8 max-w-md mx-auto">
-              Looks like you haven't added any products yet. Browse our catalog
+              Looks like you haven&apos;t added any products yet. Browse our catalog
               to find great wholesale deals.
             </p>
             <Link to="/" className="btn-primary btn-lg">

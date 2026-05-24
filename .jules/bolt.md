@@ -1,0 +1,3 @@
+## 2024-06-25 - Replace O(n²) React Render Bottleneck with O(n) Hash Map Lookup
+**Learning:** Found a severe anti-pattern in `ProductCard.jsx` where it searched through the entire `cartItems` array during every render for every product (O(M × N) complexity). Additionally, `CartContext.jsx` was calculating `totalPrice` and `totalQuantity` in unused `useEffect` hooks.
+**Action:** Replaced array `.find()` lookups with an O(1) dictionary lookup by building a `cartDictionary` with `useMemo` in `CartContext`. Moved total quantity and price computations into `useMemo` hooks, completely avoiding O(M × N) render bottlenecks and unnecessary local recalcs. Always use dictionaries for list-to-list matching during React renders.
