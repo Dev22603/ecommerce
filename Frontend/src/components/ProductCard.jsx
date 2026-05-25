@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, memo } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { CartContext } from "../context/CartContext";
 import { toast } from "react-toastify";
@@ -11,6 +11,7 @@ import {
   HiOutlinePhotograph,
 } from "react-icons/hi";
 
+// Wrapped in React.memo to prevent unnecessary re-renders when parent component (e.g., Home) updates state like search queries
 const ProductCard = ({ product }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
@@ -244,4 +245,4 @@ const ProductCard = ({ product }) => {
   );
 };
 
-export default ProductCard;
+export default memo(ProductCard);

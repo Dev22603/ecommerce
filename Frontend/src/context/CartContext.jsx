@@ -125,24 +125,7 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Calculate total price (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalPrice = cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-        // You can use this `totalPrice` anywhere you need it
-    }, [cartItems]);
-
-    // Calculate total quantity (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalQuantity = cartItems.reduce(
-            (total, item) => total + item.quantity,
-            0
-        );
-        // You can use this `totalQuantity` anywhere you need it
-    }, [cartItems]);
-
+    // Removed two wasteful useEffect hooks here that were re-calculating totalPrice and totalQuantity unnecessarily without saving the results anywhere.
     // Get a specific cart item's quantity
     const getCartItemQuantity = (productId) => {
         const item = cartItems.find(
