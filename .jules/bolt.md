@@ -1,0 +1,3 @@
+## 2026-05-26 - Frontend N+1 Bottleneck in Cart
+**Learning:** The Cart component fetched products individually in a loop (`productService.getProductById`) to supplement the `/cart` endpoint because the backend `mapCartItem` omitted `mrp` and `stock`, despite Prisma fetching the full product relation. This created an N+1 API call bottleneck.
+**Action:** When working on Frontend components, verify if the backend is already fetching the required relation data but simply omitting it in the mapper. Expose the missing fields in the backend to eliminate multiple redundant API calls from the frontend.

@@ -10,6 +10,8 @@ const mapCartItem = (item: any) => ({
 	images: item.product.images,
 	sales_price: item.product.salesPrice,
 	total_price_per_item: item.quantity * item.product.salesPrice,
+	mrp: item.product.mrp,
+	stock: item.product.stock,
 });
 
 export const cartService = {

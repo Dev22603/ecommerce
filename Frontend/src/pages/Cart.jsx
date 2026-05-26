@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { cartService } from "../services/cartService";
-import { productService } from "../services/productService";
 import { orderService } from "../services/ordersService";
 import { addressService } from "../services/addressService";
 import { toast } from "react-toastify";
@@ -101,18 +100,15 @@ const Cart = () => {
     try {
       const response = await cartService.getCart(1, 100, token);
       const items = response.items || [];
-      const updatedItems = await Promise.all(
-        items.map(async (item) => {
-          const product = await productService.getProductById(item.product_id);
-          return {
-            ...item,
-            price: product.sales_price,
-            mrp: product.mrp,
-            totalPrice: product.sales_price * item.quantity,
-            stock: product.stock,
-          };
-        })
-      );
+      const updatedItems = items.map((item) => {
+        return {
+          ...item,
+          price: item.sales_price,
+          mrp: item.mrp,
+          totalPrice: item.sales_price * item.quantity,
+          stock: item.stock,
+        };
+      });
       setCartItems(updatedItems);
     } catch (error) {
       toast.error(error.message);
