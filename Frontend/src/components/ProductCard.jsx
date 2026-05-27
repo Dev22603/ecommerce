@@ -11,7 +11,7 @@ import {
   HiOutlinePhotograph,
 } from "react-icons/hi";
 
-const ProductCard = ({ product }) => {
+const ProductCard = React.memo(({ product }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -242,6 +242,8 @@ const ProductCard = ({ product }) => {
       )}
     </div>
   );
-};
+});
+
+ProductCard.displayName = "ProductCard";
 
 export default ProductCard;
