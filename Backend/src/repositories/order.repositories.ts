@@ -42,12 +42,16 @@ export const orderRepository = {
 				},
 			});
 
-			for (const item of cartItems) {
-				await tx.product.update({
-					where: { id: item.productId },
-					data: { stock: { decrement: item.quantity } },
-				});
-			}
+			// ⚡ Bolt: Use Promise.all to execute independent database updates concurrently
+			// Impact: Prevents event loop blocking within the Prisma transaction and reduces total latency
+			await Promise.all(
+				cartItems.map((item) =>
+					tx.product.update({
+						where: { id: item.productId },
+						data: { stock: { decrement: item.quantity } },
+					})
+				)
+			);
 
 			await tx.cart.deleteMany({ where: { userId } });
 			return { kind: "created" as const, orderId: order.id };
