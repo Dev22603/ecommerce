@@ -1,0 +1,3 @@
+## 2024-06-03 - [Sequential Awaits in Prisma Transactions]
+**Learning:** This codebase had sequential database updates inside a Prisma transaction loop during order checkout (`for...await` loop updating stock). This caused O(N) network roundtrips that block the event loop sequentially.
+**Action:** Always use `await Promise.all()` with `.map` to execute independent database update operations concurrently when inside a Prisma transaction, reducing network latency and improving throughput.
