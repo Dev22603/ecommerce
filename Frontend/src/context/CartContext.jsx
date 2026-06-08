@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { cartService } from "../services/cartService";
 import { AuthContext } from "./AuthContext";
 
@@ -125,22 +125,17 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Calculate total price (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalPrice = cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-        // You can use this `totalPrice` anywhere you need it
+    // ⚡ Bolt: Memoize derived cart state to avoid recalculating on every render
+    // Impact: Prevents O(N) recalculation of total price and quantity on every render of components consuming the CartContext
+    const totalQuantity = useMemo(() => {
+        return cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
     }, [cartItems]);
 
-    // Calculate total quantity (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalQuantity = cartItems.reduce(
-            (total, item) => total + item.quantity,
+    const totalPrice = useMemo(() => {
+        return cartItems.reduce(
+            (total, item) => total + (item.sales_price || 0) * (item.quantity || 0),
             0
         );
-        // You can use this `totalQuantity` anywhere you need it
     }, [cartItems]);
 
     // Get a specific cart item's quantity
@@ -152,17 +147,10 @@ export const CartProvider = ({ children }) => {
     };
 
     // Get the total quantity of items in the cart
-    const getTotalQuantity = () => {
-        return cartItems.reduce((total, item) => total + item.quantity, 0);
-    };
+    const getTotalQuantity = () => totalQuantity;
 
     // Get the total price of items in the cart
-    const getTotalPrice = () => {
-        return cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-    };
+    const getTotalPrice = () => totalPrice;
 
     return (
         <CartContext.Provider
@@ -176,6 +164,8 @@ export const CartProvider = ({ children }) => {
                 getCartItemQuantity,
                 getTotalQuantity,
                 getTotalPrice,
+                totalQuantity,
+                totalPrice,
                 loading,
                 error,
             }}

@@ -16,7 +16,7 @@ import {
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
-  const { cartItems } = useContext(CartContext);
+  const { totalQuantity } = useContext(CartContext);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -24,9 +24,6 @@ const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
-
-  // Derive total quantity from cartItems
-  const totalQuantity = cartItems.reduce((sum, item) => sum + (item.quantity || 0), 0);
 
   // Handle scroll
   useEffect(() => {
