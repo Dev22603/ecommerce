@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
   const [isHovered, setIsHovered] = useState(false);
   const { user } = useContext(AuthContext);
   const {
-    cartItems,
+    cartItemsMap,
     addItemToCart,
     updateItemQuantity,
     removeItemFromCart,
@@ -30,9 +30,7 @@ const ProductCard = ({ product }) => {
     : null;
 
   // Get cart item and quantity from context
-  const cartItem = cartItems.find(
-    (item) => item.product_id === product.id || item.id === product.id
-  );
+  const cartItem = cartItemsMap[product.id];
   const quantity = cartItem?.quantity || 0;
 
   const handleAddToCart = async () => {

@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useMemo } from "react";
 import { cartService } from "../services/cartService";
 import { AuthContext } from "./AuthContext";
 
@@ -125,29 +125,18 @@ export const CartProvider = ({ children }) => {
         }
     };
 
-    // Calculate total price (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalPrice = cartItems.reduce(
-            (total, item) => total + item.sales_price * item.quantity,
-            0
-        );
-        // You can use this `totalPrice` anywhere you need it
-    }, [cartItems]);
-
-    // Calculate total quantity (runs whenever cartItems are updated)
-    useEffect(() => {
-        const totalQuantity = cartItems.reduce(
-            (total, item) => total + item.quantity,
-            0
-        );
-        // You can use this `totalQuantity` anywhere you need it
+    const cartItemsMap = useMemo(() => {
+        const map = {};
+        cartItems.forEach((item) => {
+            const key = item.product_id || item.id;
+            map[key] = item;
+        });
+        return map;
     }, [cartItems]);
 
     // Get a specific cart item's quantity
     const getCartItemQuantity = (productId) => {
-        const item = cartItems.find(
-            (item) => item.product_id === productId || item.id === productId
-        );
+        const item = cartItemsMap[productId];
         return item ? item.quantity : 0;
     };
 
@@ -168,6 +157,7 @@ export const CartProvider = ({ children }) => {
         <CartContext.Provider
             value={{
                 cartItems,
+                cartItemsMap,
                 addItemToCart,
                 updateItemQuantity,
                 removeItemFromCart,
