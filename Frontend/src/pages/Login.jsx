@@ -157,7 +157,7 @@ const Login = () => {
               Sign in to your account
             </h2>
             <p className="text-nexus-300">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link
                 to="/signup"
                 className="text-accent hover:text-accent-light transition-colors font-medium"

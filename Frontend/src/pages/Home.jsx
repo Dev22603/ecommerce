@@ -174,7 +174,7 @@ const Home = () => {
             {/* Subheadline */}
             <p className="text-lg sm:text-xl text-nexus-200 mb-10 max-w-2xl mx-auto animate-fade-in-up animation-delay-100">
               Belts, Purses, Goggles, Gift Paper, Birthday Decorations, Balloons & more.
-              Quality wholesale products from Ahmedabad's trusted Tankshal market.
+              Quality wholesale products from Ahmedabad&apos;s trusted Tankshal market.
             </p>
 
             {/* Search Bar */}
@@ -290,7 +290,7 @@ const Home = () => {
               <h2 className="font-heading text-2xl sm:text-3xl font-bold text-nexus-50">
                 {isSearching ? (
                   <>
-                    Results for "{searchQuery}"
+                    Results for &quot;{searchQuery}&quot;
                     <button
                       onClick={clearSearch}
                       className="ml-4 text-sm font-normal text-nexus-300 hover:text-accent transition-colors inline-flex items-center gap-1"
