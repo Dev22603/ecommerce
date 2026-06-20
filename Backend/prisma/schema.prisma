@@ -45,18 +45,19 @@ model Category {
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  productName String      @map("product_name") @db.VarChar(255)
-  salesPrice  Int         @map("sales_price")
+  id          Int      @id @default(autoincrement())
+  productName String   @map("product_name") @db.VarChar(255)
+  salesPrice  Int      @map("sales_price")
   mrp         Int
-  images      String[]    @default([])
-  categoryId  Int         @map("category_id")
-  stock       Int         @default(0)
+  images      String[] @default([])
+  categoryId  Int      @map("category_id")
+  stock       Int      @default(0)
 
   category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   carts      Cart[]
   orderItems OrderItem[]
 
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -71,6 +72,7 @@ model Cart {
 
   @@id([userId, productId])
   @@unique([userId, productId])
+  @@index([productId])
   @@map("carts")
 }
 
@@ -93,6 +95,7 @@ model Address {
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
 
+  @@index([userId])
   @@map("addresses")
 }
 
@@ -108,6 +111,8 @@ model Order {
   address    Address?    @relation(fields: [addressId], references: [id], onDelete: SetNull)
   orderItems OrderItem[]
 
+  @@index([userId])
+  @@index([addressId])
   @@map("orders")
 }
 
@@ -121,5 +126,7 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
