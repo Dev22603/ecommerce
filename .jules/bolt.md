@@ -1,0 +1,3 @@
+## 2024-05-24 - Prisma Foreign Key Indexing Missing by Default
+**Learning:** In this application's architecture (Node.js/Prisma/PostgreSQL), Prisma does not automatically generate database indexes for foreign key relation fields. This was causing missing indexes on heavily queried tables like Orders, Products, and Addresses, creating a potential bottleneck for cascading deletes and complex relational reads.
+**Action:** Always explicitly declare `@@index([foreignKey])` in `schema.prisma` on relations. Additionally, remember to manually generate `migration.sql` when local DB connections are unavailable for `prisma migrate dev`.
