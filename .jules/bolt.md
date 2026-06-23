@@ -1,0 +1,3 @@
+## 2024-06-23 - Database Indexing on Prisma Foreign Keys
+**Learning:** Prisma does not automatically generate database indexes for foreign keys (relation fields) mapped to columns in PostgreSQL. This can cause slow relational queries and full table scans on frequently queried relational fields like `userId` or `categoryId`.
+**Action:** Always explicitly add `@@index([foreignKeyField])` to Prisma models where the field is frequently queried (e.g. relation fields used for joins) to prevent relational bottlenecks. Remember to create corresponding database migrations if the database is unreachable to generate via dev tools.
