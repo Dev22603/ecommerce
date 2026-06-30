@@ -45,18 +45,20 @@ model Category {
 }
 
 model Product {
-  id          Int         @id @default(autoincrement())
-  productName String      @map("product_name") @db.VarChar(255)
-  salesPrice  Int         @map("sales_price")
+  id          Int      @id @default(autoincrement())
+  productName String   @map("product_name") @db.VarChar(255)
+  salesPrice  Int      @map("sales_price")
   mrp         Int
-  images      String[]    @default([])
-  categoryId  Int         @map("category_id")
-  stock       Int         @default(0)
+  images      String[] @default([])
+  categoryId  Int      @map("category_id")
+  stock       Int      @default(0)
 
   category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   carts      Cart[]
   orderItems OrderItem[]
 
+  // Bolt: Add index on categoryId to optimize product queries by category
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -93,6 +95,8 @@ model Address {
   user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   orders Order[]
 
+  // Bolt: Add index on userId to speed up fetching a user's addresses
+  @@index([userId])
   @@map("addresses")
 }
 
@@ -108,6 +112,9 @@ model Order {
   address    Address?    @relation(fields: [addressId], references: [id], onDelete: SetNull)
   orderItems OrderItem[]
 
+  // Bolt: Add indexes on foreign keys to optimize query performance when looking up user orders or filtering by address
+  @@index([userId])
+  @@index([addressId])
   @@map("orders")
 }
 
@@ -121,5 +128,8 @@ model OrderItem {
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
+  // Bolt: Add indexes on foreign keys to accelerate order-item joins
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
