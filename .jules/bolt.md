@@ -1,0 +1,3 @@
+## 2024-07-04 - [Missing Foreign Key Indexes in Prisma]
+**Learning:** Prisma does not automatically generate database indexes for foreign keys (relation fields) mapped to columns. This can lead to severe performance degradation (full table scans) on relational queries (e.g. fetching products by category or orders by user).
+**Action:** Always explicitly add `@@index([foreignKeyField])` to Prisma models where the field is frequently queried.
