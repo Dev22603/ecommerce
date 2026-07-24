@@ -79,7 +79,7 @@ API_URL=http://localhost:5000/api
 FRONTEND_URL=http://localhost:5173
 ```
 
-Apply the database migration and load sample products:
+Apply the database migration and load sample categories and products (seed does not create users):
 
 ```bash
 npm run db:generate
@@ -105,7 +105,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:5173`.
+Open `http://localhost:5173`, then create an account with the signup page. The seed data only includes categories and products.
 
 ## Common commands
 
