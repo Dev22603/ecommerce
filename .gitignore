@@ -155,10 +155,33 @@ thumb
 sketch
 
 # End of https://www.toptal.com/developers/gitignore/api/node,react
-# Added by code-review-graph
-.code-review-graph/
+
+# Local editor / agent tooling (keep out of the repo)
 .claude/
 .cursor/
-CLAUDE.md
+.codex/
+.agents/
+.continue/
+.windsurf/
+.aider*
+.idea/
+.vscode/
+.code-review-graph/
+.commandcode/
+.opencode/
 .mcp.json
 .opencode.json
+CLAUDE.md
+AGENTS.md
+**/AGENTS.md
+**/.skillfish.json
+
+# Generated analysis / knowledge-graph output
+graphify-out/
+**/graphify-out/
+.graphifyignore
+**/.graphifyignore
+
+# Scratch / planning dumps
+**/dir.txt
+**/LOGGING_CHECKLIST.md
